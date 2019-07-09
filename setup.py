@@ -43,10 +43,11 @@ bbclib_classifiers = [
                     'Topic :: Software Development']
 
 setup(
-    name='bbclib',
+    name='py-bbclib',
     version='1.3',
     description='The library of BBc-1 transaction data structure definition',
     long_description=readme,
+    long_description_content_type='text/markdown',
     url='https://github.com/beyond-blockchain/py-bbclib',
     author='beyond-blockchain.org',
     author_email='bbc1-dev@beyond-blockchain.org',
