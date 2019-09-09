@@ -54,6 +54,7 @@ jobs:
             pytest test_bbclib_idlen.py
             pytest test_bbclib_nopubkey.py
             pytest test_bbclib_pack_unpack.py
+            pytest test_bbclib_assets_v3.py
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}
           paths:
