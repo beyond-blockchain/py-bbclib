@@ -115,6 +115,8 @@ class BBcTransaction:
                 self.relations.extend(relation)
             else:
                 self.relations.append(relation)
+            for rtn in self.relations:
+                rtn.version = self.version
         if witness is not None:
             witness.transaction = self
             self.witness = witness
@@ -277,12 +279,18 @@ class BBcTransaction:
                 ptr, size = bbclib_utils.get_n_byte_int(ptr, 4, data)
                 ptr, rtndata = bbclib_utils.get_n_bytes(ptr, size, data)
                 rtn = BBcRelation()
-                if not rtn.unpack(rtndata):
+                if not rtn.unpack(rtndata, self.version):
                     return False
                 self.relations.append(rtn)
                 if ptr >= data_size:
                     return False
-                self.asset_group_ids[rtn.asset.asset_id] = rtn.asset_group_id
+                if rtn.asset is not None:
+                    self.asset_group_ids[rtn.asset.asset_id] = rtn.asset_group_id
+                if rtn.asset_raw is not None:
+                    self.asset_group_ids[rtn.asset_raw.asset_id] = rtn.asset_group_id
+                if rtn.asset_hash is not None:
+                    for h in rtn.asset_hash.asset_ids:
+                        self.asset_group_ids[h] = rtn.asset_group_id
 
             ptr, witness_num = bbclib_utils.get_n_byte_int(ptr, 2, data)
             if witness_num == 0:

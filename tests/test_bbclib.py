@@ -4,7 +4,7 @@ import pytest
 import binascii
 import sys
 sys.path.extend(["../"])
-from bbclib import BBcTransaction, BBcEvent, BBcReference, BBcWitness, BBcAsset, BBcCrossRef, KeyPair
+from bbclib import BBcTransaction, BBcEvent, BBcReference, BBcWitness, BBcAsset, BBcCrossRef, KeyPair, BBcAssetRaw, BBcAssetHash
 import bbclib
 
 user_id = bbclib.get_new_id("user_id_test1")
@@ -40,7 +40,7 @@ class TestBBcLib(object):
         kp = KeyPair(pubkey=keypair1.public_key)
         assert kp.public_key
 
-    def test_01_asset(self):
+    def test_01_1_asset(self):
         print("\n-----", sys._getframe().f_code.co_name, "-----")
         global asset1, asset2
         asset1 = BBcAsset(user_id=user_id, asset_body=b'12345678')
@@ -57,6 +57,40 @@ class TestBBcLib(object):
         if asset_tmp.asset_body_size > 0:
             print("body:", binascii.b2a_hex(asset_tmp.asset_body))
         print("digest:", binascii.b2a_hex(asset_tmp.asset_id))
+
+    def test_01_2_asset_raw(self):
+        print("\n-----", sys._getframe().f_code.co_name, "-----")
+        asid = bbclib.get_new_id("assetraw1")
+        asset_raw = BBcAssetRaw(asset_id=asid, asset_body=b'1234567890abcdefg')
+
+        # --- for checking pack/unpack function ---
+        dat = asset_raw.pack()
+        print("Digest:", binascii.b2a_hex(asset_raw.digest()))
+        print("Serialized data:", binascii.b2a_hex(dat))
+        asset_tmp = BBcAssetRaw()
+        asset_tmp.unpack(dat)
+        print("body_len:", asset_tmp.asset_body_size)
+        if asset_tmp.asset_body_size > 0:
+            print("body:", binascii.b2a_hex(asset_tmp.asset_body))
+        print("digest:", binascii.b2a_hex(asset_tmp.asset_id))
+        assert asset_tmp.asset_id == asid
+        assert asset_tmp.asset_body == b'1234567890abcdefg'
+
+    def test_01_3_asset_hash(self):
+        print("\n-----", sys._getframe().f_code.co_name, "-----")
+        ash = [bbclib.get_new_id("assethash%d"%i) for i in range(1, 4)]
+        asset_hash = BBcAssetHash(asset_ids=[ash[0]])
+        asset_hash.add(asset_ids=ash[1:])
+
+        # --- for checking pack/unpack function ---
+        dat = asset_hash.pack()
+        print("Digest:", binascii.b2a_hex(asset_hash.digest()))
+        print("Serialized data:", binascii.b2a_hex(dat))
+        asset_tmp = BBcAssetHash()
+        asset_tmp.unpack(dat)
+        for i, h in enumerate(asset_tmp.asset_ids):
+            assert ash[i] == h
+            print("hash: %s" % h.hex())
 
     def test_02_event(self):
         print("\n-----", sys._getframe().f_code.co_name, "-----")

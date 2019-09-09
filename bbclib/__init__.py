@@ -40,6 +40,8 @@ import bbclib.libs.bbclib_transaction as bbclib_transaction
 import bbclib.libs.bbclib_signature as bbclib_signature
 import bbclib.libs.bbclib_keypair as bbclib_keypair
 import bbclib.libs.bbclib_asset as bbclib_asset
+import bbclib.libs.bbclib_asset_raw as bbclib_asset_raw
+import bbclib.libs.bbclib_asset_hash as bbclib_asset_hash
 import bbclib.libs.bbclib_crossref as bbclib_crossref
 import bbclib.libs.bbclib_event as bbclib_event
 import bbclib.libs.bbclib_msgtype as bbclib_msgtype
@@ -150,4 +152,6 @@ BBcRelation = bbclib_relation.BBcRelation
 BBcPointer = bbclib_pointer.BBcPointer
 BBcWitness = bbclib_witness.BBcWitness
 BBcAsset = bbclib_asset.BBcAsset
+BBcAssetRaw = bbclib_asset_raw.BBcAssetRaw
+BBcAssetHash = bbclib_asset_hash.BBcAssetHash
 BBcCrossRef = bbclib_crossref.BBcCrossRef
