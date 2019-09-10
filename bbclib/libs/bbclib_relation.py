@@ -70,11 +70,10 @@ class BBcRelation:
                 self.pointers.append(pointer)
         if asset is not None:
             self.asset = asset
-        if self.version >= 3:
-            if asset_raw is not None:
-                self.asset_raw = asset_raw
-            if asset_hash is not None:
-                self.asset_hash = asset_hash
+        if asset_raw is not None:
+            self.asset_raw = asset_raw
+        if asset_hash is not None:
+            self.asset_hash = asset_hash
         return True
 
     def pack(self):
@@ -148,14 +147,14 @@ class BBcRelation:
                 self.asset_raw = None
                 ptr, astsize = bbclib_utils.get_n_byte_int(ptr, 4, data)
                 if astsize > 0:
-                    self.asset_raw = BBcAssetRaw(version=version)
+                    self.asset_raw = BBcAssetRaw()
                     ptr, astdata = bbclib_utils.get_n_bytes(ptr, astsize, data)
                     if not self.asset_raw.unpack(astdata):
                         return False
                 self.asset_hash = None
                 ptr, astsize = bbclib_utils.get_n_byte_int(ptr, 4, data)
                 if astsize > 0:
-                    self.asset_hash = BBcAssetHash(version=version)
+                    self.asset_hash = BBcAssetHash()
                     ptr, astdata = bbclib_utils.get_n_bytes(ptr, astsize, data)
                     if not self.asset_hash.unpack(astdata):
                         return False

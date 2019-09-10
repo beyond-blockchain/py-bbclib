@@ -32,10 +32,9 @@ from bbclib import id_length_conf
 class BBcAssetHash:
     """AssetHash part in a transaction
     """
-    def __init__(self, asset_ids=None, id_length=None, version=3):
+    def __init__(self, asset_ids=None, id_length=None):
         if id_length is not None:
             bbclib.configure_id_length_all(id_length)
-        self.version = version
         self.asset_ids = []
         if asset_ids is not None:
             self.add(asset_ids=asset_ids)

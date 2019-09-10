@@ -30,6 +30,8 @@ from bbclib.libs.bbclib_config import DEFAULT_ID_LEN
 
 from bbclib.libs.bbclib_transaction import BBcTransaction
 from bbclib.libs.bbclib_signature import BBcSignature
+from bbclib.libs.bbclib_asset_raw import BBcAssetRaw
+from bbclib.libs.bbclib_asset_hash import BBcAssetHash
 from bbclib.libs.bbclib_asset import BBcAsset
 from bbclib.libs.bbclib_relation import BBcRelation
 from bbclib.libs.bbclib_reference import BBcReference
@@ -74,7 +76,13 @@ def get_random_id():
 
 
 def get_random_value(length=DEFAULT_ID_LEN):
-    """Return 1-byte random value"""
+    """Return random bytes
+
+    Args:
+        length (int): length of the result
+    Returns:
+        bytes: random bytes
+    """
     val = bytearray()
     for i in range(length):
         val.append(random.randint(0,255))
@@ -82,7 +90,14 @@ def get_random_value(length=DEFAULT_ID_LEN):
 
 
 def convert_id_to_string(data, bytelen=DEFAULT_ID_LEN):
-    """Convert binary data to hex string"""
+    """Convert binary data to hex string
+
+    Args:
+        data (bytes): data to convert
+        bytelen (int): length of the result
+    Returns:
+        str: converted string
+    """
     res = binascii.b2a_hex(data)
     if len(res) < bytelen*2:
         res += "0"*(bytelen*2-len(res)) + res
@@ -90,7 +105,14 @@ def convert_id_to_string(data, bytelen=DEFAULT_ID_LEN):
 
 
 def convert_idstring_to_bytes(datastr, bytelen=DEFAULT_ID_LEN):
-    """Convert hex string to binary data"""
+    """Convert hex string to binary data
+
+    Args:
+        datastr (str): data to convert
+        bytelen (int): length of the result
+    Returns:
+        bytes: converted byte data
+    """
     res = bytearray(binascii.a2b_hex(datastr))
     if len(res) < bytelen:
         res = bytearray([0]*(bytelen-len(res)))+res
@@ -117,18 +139,18 @@ def deep_copy_with_key_stringify(u, d=None):
     return d
 
 
-def make_transaction(event_num=0, relation_num=0, witness=False, id_length=DEFAULT_ID_LEN):
+def make_transaction(event_num=0, relation_num=0, witness=False, version=2):
     """Utility to make transaction object
 
     Args:
         event_num (int): the number of BBcEvent object to include in the transaction
         relation_num (int): the number of BBcRelation object to include in the transaction
         witness (bool): If true, BBcWitness object is included in the transaction
-        id_length (int): If <32, IDs will be truncated (this params is for the backward compatibility)
+        version (int): version of the transaction format
     Returns:
         BBcTransaction:
     """
-    transaction = BBcTransaction()
+    transaction = BBcTransaction(version=version)
     if event_num > 0:
         for i in range(event_num):
             evt = BBcEvent()
@@ -144,13 +166,58 @@ def make_transaction(event_num=0, relation_num=0, witness=False, id_length=DEFAU
 
 
 def add_relation_asset(transaction, relation_idx, asset_group_id, user_id, asset_body=None, asset_file=None):
-    """Utility to add BBcRelation object with BBcAsset in the transaction"""
+    """Utility to add BBcRelation object with BBcAsset in the transaction
+
+    Args:
+        transaction (BBcTransaction): transaction object to manipulate
+        relation_idx (int): the number of BBcRelation object to include in the transaction
+        asset_group_id (bytes): asset_group_id of the asset in the object
+        user_id (bytes): user_id of the owner of the asset
+        asset_body (str|bytes|dict): asset data
+        asset_file (bytes): file data (binary) for asset
+    """
     ast = BBcAsset(user_id=user_id, asset_file=asset_file, asset_body=asset_body)
     transaction.relations[relation_idx].add(asset_group_id=asset_group_id, asset=ast)
 
 
+def add_relation_asset_raw(transaction, relation_idx, asset_group_id, asset_id=None, asset_body=None):
+    """Utility to add BBcRelation object with BBcAssetRaw in the transaction
+
+    Args:
+        transaction (BBcTransaction): transaction object to manipulate
+        relation_idx (int): the number of BBcRelation object to include in the transaction
+        asset_group_id (bytes): asset_group_id of the asset in the object
+        asset_id (bytes): the identifier of the asset
+        asset_body (str|bytes|dict): asset data
+    """
+    ast = BBcAssetRaw()
+    transaction.relations[relation_idx].add(asset_group_id=asset_group_id, asset_raw=ast)
+    ast.add(asset_id=asset_id, asset_body=asset_body)
+
+
+def add_relation_asset_hash(transaction, relation_idx, asset_group_id, asset_ids=None):
+    """Utility to add BBcRelation object with BBcAssetHash in the transaction
+
+    Args:
+        transaction (BBcTransaction): transaction object to manipulate
+        relation_idx (int): the number of BBcRelation object to include in the transaction
+        asset_group_id (bytes): asset_group_id of the asset in the object
+        asset_ids (list(bytes)): list of the identifiers of assets
+    """
+    ast = BBcAssetHash()
+    transaction.relations[relation_idx].add(asset_group_id=asset_group_id, asset_hash=ast)
+    ast.add(asset_ids=asset_ids)
+
+
 def add_relation_pointer(transaction, relation_idx, ref_transaction_id=None, ref_asset_id=None):
-    """Utility to add BBcRelation object with BBcPointer in the transaction"""
+    """Utility to add BBcRelation object with BBcPointer in the transaction
+
+    Args:
+        transaction (BBcTransaction): the base transaction object to manipulate
+        relation_idx (int): the number of BBcRelation object to include in the transaction
+        ref_transaction_id (bytes): transaction_id of the transaction that the base transaction object refers to
+        ref_asset_id (bytes): asset_id of the asset that the transaction object refers to
+    """
     pointer = BBcPointer(transaction_id=ref_transaction_id, asset_id=ref_asset_id)
     transaction.relations[relation_idx].add(pointer=pointer)
 
@@ -158,6 +225,11 @@ def add_relation_pointer(transaction, relation_idx, ref_transaction_id=None, ref
 def add_reference_to_transaction(transaction, asset_group_id, ref_transaction_obj, event_index_in_ref):
     """Utility to add BBcReference object in the transaction
 
+    Args:
+        transaction (BBcTransaction): the base transaction object to manipulate
+        asset_group_id (bytes): asset_group_id of the asset in the object
+        ref_transaction_obj (BBcTransaction): the transaction object that the base transaction object refers to
+        event_index_in_ref (int): the number of BBcEvent object to include in the transaction that the base transaction object refers to
     Returns:
         BBcReference:
     """
@@ -176,21 +248,75 @@ def add_event_asset(transaction, event_idx, asset_group_id, user_id, asset_body=
 
 
 def make_relation_with_asset(asset_group_id, user_id, asset_body=None, asset_file=None):
-    """Utility to make BBcRelation object"""
+    """Utility to make BBcRelation object with BBcAsset
+
+    Args:
+        asset_group_id (bytes): asset_group_id of the asset in the object
+        user_id (bytes): user_id of the owner of the asset
+        asset_body (str|bytes|dict): asset data
+        asset_file (bytes): file data (binary) for asset
+    Returns:
+        BBcRelation: created BBcRelation object
+    """
     relation = BBcRelation()
     ast = BBcAsset(user_id=user_id, asset_file=asset_file, asset_body=asset_body)
     relation.add(asset_group_id=asset_group_id, asset=ast)
     return relation
 
 
+def make_relation_with_asset_raw(asset_group_id, asset_id=None, asset_body=None):
+    """Utility to make BBcRelation object with BBcAssetRaw
+
+    Args:
+        asset_group_id (bytes): asset_group_id of the asset in the object
+        asset_id (bytes): the identifier of the asset
+        asset_body (str|bytes|dict): asset data
+    Returns:
+        BBcRelation: created BBcRelation object
+    """
+    relation = BBcRelation()
+    ast = BBcAssetRaw()
+    relation.add(asset_group_id=asset_group_id, asset_raw=ast)
+    ast.add(asset_id=asset_id, asset_body=asset_body)
+    return relation
+
+
+def make_relation_with_asset_hash(asset_group_id, asset_ids=None):
+    """Utility to make BBcRelation object with BBcAssetHash
+
+    Args:
+        asset_group_id (bytes): asset_group_id of the asset in the object
+        asset_ids (list(bytes)): list of the identifiers of assets
+    Returns:
+        BBcRelation: created BBcRelation object
+    """
+    relation = BBcRelation()
+    ast = BBcAssetHash()
+    relation.add(asset_group_id=asset_group_id, asset_hash=ast)
+    ast.add(asset_ids=asset_ids)
+    return relation
+
+
 def add_pointer_in_relation(relation, ref_transaction_id=None, ref_asset_id=None):
-    """Utility to add BBcRelation object with BBcPointer in the BBcRelation object"""
+    """Utility to add BBcRelation object with BBcPointer in the BBcRelation object
+
+    Args:
+        relation (BBcRelation): BBcRelation object to manipulate
+        ref_transaction_id (bytes): transaction_id of the transaction that the base transaction object refers to
+        ref_asset_id (bytes): asset_id of the asset that the transaction object refers to
+    """
     pointer = BBcPointer(transaction_id=ref_transaction_id, asset_id=ref_asset_id)
     relation.add(pointer=pointer)
 
 
 def recover_signature_object(data):
-    """Unpack signature data"""
+    """Unpack signature data
+
+    Args:
+        data (bytes): Serialized data of BBcSignature object
+    Returns:
+        BBcSignature: BBcSignature object
+    """
     sig = BBcSignature()
     sig.unpack(data)
     return sig

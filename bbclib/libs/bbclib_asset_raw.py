@@ -34,10 +34,9 @@ class BBcAssetRaw:
 
     In this object, asset_id should be given externally, meaning that this object does not care about how to calculate the digest.
     """
-    def __init__(self, asset_id=None, asset_body=None, id_length=None, version=3):
+    def __init__(self, asset_id=None, asset_body=None, id_length=None):
         if id_length is not None:
             bbclib.configure_id_length_all(id_length)
-        self.version = version
         self.asset_id = None
         self.asset_body_size = 0
         self.asset_body = None
