@@ -18,7 +18,6 @@ import os
 import sys
 
 import hashlib
-import msgpack
 import traceback
 
 current_dir = os.path.abspath(os.path.dirname(__file__))

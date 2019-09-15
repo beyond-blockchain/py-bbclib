@@ -159,7 +159,7 @@ def make_transaction(event_num=0, relation_num=0, witness=False, version=2):
             transaction.add(event=evt)
     if relation_num > 0:
         for i in range(relation_num):
-            transaction.add(relation=BBcRelation())
+            transaction.add(relation=BBcRelation(version=version))
     if witness:
         transaction.add(witness=BBcWitness())
     return transaction
@@ -274,7 +274,7 @@ def make_relation_with_asset_raw(asset_group_id, asset_id=None, asset_body=None)
     Returns:
         BBcRelation: created BBcRelation object
     """
-    relation = BBcRelation()
+    relation = BBcRelation(version=3)
     ast = BBcAssetRaw()
     relation.add(asset_group_id=asset_group_id, asset_raw=ast)
     ast.add(asset_id=asset_id, asset_body=asset_body)
@@ -290,7 +290,7 @@ def make_relation_with_asset_hash(asset_group_id, asset_ids=None):
     Returns:
         BBcRelation: created BBcRelation object
     """
-    relation = BBcRelation()
+    relation = BBcRelation(version=3)
     ast = BBcAssetHash()
     relation.add(asset_group_id=asset_group_id, asset_hash=ast)
     ast.add(asset_ids=asset_ids)
