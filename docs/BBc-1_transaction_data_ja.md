@@ -1,7 +1,7 @@
 BBc-1 Transaction data structure
 ====
 
-このドキュメントでは、BBc-1のトランザクションのデータ構造について説明する。参照するバージョンは、BBc-1 v1.2とする。
+このドキュメントでは、BBc-1のトランザクションのデータ構造について説明する。参照するバージョンは、BBc-1 v1.5とする。
 
 # データフォーマット概要
 
@@ -485,6 +485,8 @@ class BBcRelation:
             self.asset_group_id = asset_group_id
         self.pointers = list()
         self.asset = None
+        self.asset_raw = None
+        self.asset_hash = None
 ```
 
 - packされる変数
@@ -494,6 +496,10 @@ class BBcRelation:
 | asset_group_id | このオブジェクトが保持するBBcAssetオブジェクトのアセット種別を表す識別子 |
 | pointers       | 上位のtransaction objectがBBcReferenceオブジェクトを伴う場合に、このBBcEventオブジェクトがどのBBcReferenceオブジェクトに対応するものかをリスト(events)の要素番号で指定する。 |
 | asset          | このオブジェクトに登録されているBBcAssetを操作する（所有権移転など）際に、必ず承認を取得すべきuser_idのリストを保持する。 |
+| asset_raw      | アセットの本体（アセット内の形式は自由で、アセット識別子も自由に設定できる） |
+| asset_hash     | アセット識別子のリスト（アセット識別子は自由に設定可能で、アセット本体をオフチェーンで情報を管理する場合を想定している） |
+
+なお、asset_rawとasset_hashはv1.5から導入された。asset、asset_raw、asset_hashを同時に指定することも可能だが、アプリケーションの観点からは、おそらくあまり意味をなさないので推奨しない。
 
 - packされない変数
 
@@ -527,11 +533,24 @@ class BBcRelation:
    ~~~                           asset                           ~~~
    |                                                               |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    length of asset_raw (4)                    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                                                               |
+   ~~~                        asset_raw                          ~~~
+   |                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                   length of asset_hash (4)                    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                                                               |
+   ~~~                       asset_hash                          ~~~
+   |                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
 
                       図10 BBcRelationのpacked data
 ```
 
-num_pointersはBBcPointerオブジェクト群の数を表し、それらのpacked data群をpointersの部分に格納する。最後に、BBcAssetのpacked dataのバイト長とそのpacked dataが格納される。
+num_pointersはBBcPointerオブジェクト群の数を表し、それらのpacked data群をpointersの部分に格納する。最後に、BBcAsset、BBcAssetRaw、BBcAssetHashそれぞれのpacked dataのバイト長とそのpacked dataが格納される。
 
 
 
@@ -625,6 +644,113 @@ class BBcAsset:
 
 
 
+## BBcAssetRaw
+
+定義ファイル：[bbc1/core/libs/bbclib_asset_raw.py](https://github.com/beyond-blockchain/bbc1/blob/develop/bbc1/core/libs/bbclib_asset_raw.py)
+
+BBcAssetRawオブジェクトは、アセット情報の本体を保持する。保持できるアセット情報は、文字列、バイナリである。このオブジェクトは前述のBBcAssetよりも単純かつ自由度の高い。なお、v1.5の時点では、BBcAssetRawはBBcRelationにしか含めることができない。
+
+### クラス定義
+
+```python
+class BBcAssetRaw:
+    def __init__(self, asset_id=None, asset_body=None, id_length=None):
+        if id_length is not None:
+            bbclib.configure_id_length_all(id_length)
+        self.asset_id = None
+        self.asset_body_size = 0
+        self.asset_body = None
+        self.add(asset_id=asset_id, asset_body=asset_body)
+```
+
+- packされる変数
+
+| 変数名          | 説明                                                         |
+| --------------- | ------------------------------------------------------------ |
+| asset_id        | BBcAssetオブジェクトの識別子（アセットの識別子）             |
+| asset_body_size | このオブジェクト（asset_body）に格納する情報のサイズ（バイト） |
+| asset_body      | アセット情報本体（文字列、バイナリまたはdictオブジェクト(pythonのみ)） |
+
+- packされない変数
+
+| 変数名    | 説明                                           |
+| --------- | ---------------------------------------------- |
+| id_length | 上位のBBcTransactionオブジェクトの値を引き継ぐ |
+
+### Packed binary data
+
+[図10](#fig10)の"asset_raw"の部分に、BBcAssetRawオブジェクトをpackしたものを格納する。その内容は以下の通りである。
+
+```asciiarmor
+    0               1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                                                               |
+   ~~~                    asset_id (ID structure)                ~~~
+   |                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |      asset_body_size (2)      |                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               |
+   |                                                               |
+   ~~~                         asset_body                        ~~~
+   |                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+                        図12 BBcAssetRawのpacked data
+```
+
+
+
+## BBcAssetHash
+
+定義ファイル：[bbc1/core/libs/bbclib_asset_hash.py](https://github.com/beyond-blockchain/bbc1/blob/develop/bbc1/core/libs/bbclib_asset_hash.py)
+
+BBcAssetHashオブジェクトは、アセット識別子のリストのみを保持する。アセット本体をオフチェーンで管理したい場合に、アセットの存在の証拠だけを登録するために用いることを想定している。なお、v1.5の時点では、BBcAssetHashはBBcRelationにしか含めることができない。
+
+### クラス定義
+
+```python
+class BBcAssetHash:
+    def __init__(self, asset_ids=None, id_length=None):
+        if id_length is not None:
+            bbclib.configure_id_length_all(id_length)
+        self.asset_ids = []
+        if asset_ids is not None:
+            self.add(asset_ids=asset_ids)
+```
+
+- packされる変数
+
+| 変数名    | 説明                   |
+| --------- | ---------------------- |
+| asset_ids | アセット識別子のリスト |
+
+- packされない変数
+
+| 変数名    | 説明                                           |
+| --------- | ---------------------------------------------- |
+| id_length | 上位のBBcTransactionオブジェクトの値を引き継ぐ |
+
+### Packed binary data
+
+[図10](#fig10)の"asset_hash"の部分に、BBcAssetHashオブジェクトをpackしたものを格納する。その内容は以下の通りである。
+
+```asciiarmor
+    0               1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |     num of identifiers (2)    |                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|                               +
+   |                                                               |
+   ~~~                     ... asset_ids                         ~~~
+   |                    (list of ID structures)                    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+                        図13 BBcAssetHashのpacked data
+```
+
+
+
 ## BBcPointer
 
 定義ファイル：[bbc1/core/libs/bbclib_pointer.py](https://github.com/beyond-blockchain/bbc1/blob/develop/bbc1/core/libs/bbclib_pointer.py)
@@ -678,7 +804,7 @@ class BBcPointer:
    |                                                               |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-                       図12 BBcPointerのpacked data
+                       図14 BBcPointerのpacked data
 ```
 
 asset_idを省略する場合は、asset_id_existence=0とし、省略しない場合はasset_id_existence=1とする。
@@ -739,7 +865,7 @@ class BBcWitness:
    ~~~                       ...                                   |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
 
-                      図13 BBcWitnessのpacked data
+                      図15 BBcWitnessのpacked data
 ```
 
 user_idsとsig_indicesはともに同じ要素数のリストなので、packed dataの冒頭のnum_sig_indicesで両方の要素数を表している。user_idとそのユーザの署名の格納位置（sig_index）のセットがnum_sig_indicesの回数だけ繰り返される。
@@ -787,7 +913,7 @@ class BBcCrossRef:
    |                                                               |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-                     図14 BBcCrossRefのpacked data
+                     図16 BBcCrossRefのpacked data
 ```
 
 他のドメインと整合を取るため、domain_idとtransaction_idのid_lengthは最大長の32バイト固定とする。短いid_lengthを使っている場合は、下位バイトにidを格納し、上位バイトは0で埋めれば良い。
@@ -854,7 +980,7 @@ class BBcSignature:
    |                                                               |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-                        図15 BBcSignatureのpacked data
+                        図17 BBcSignatureのpacked data
 ```
 
 key_type=0の場合は、key_length以降すべてのデータを省略する。なお、key_typeの種類はbbclib_keypair.pyで定義されており、2018年12月現在、対応するkey_typeは以下の通りである。
