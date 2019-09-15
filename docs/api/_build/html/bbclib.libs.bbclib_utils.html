@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bbclib.libs.bbclib_utils module &mdash; py-bbclib 1.4.1 documentation</title>
+  <title>bbclib.libs.bbclib_utils module &mdash; py-bbclib 1.5 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                1.4.1
+                1.5
               </div>
             
           
@@ -191,6 +191,15 @@ limitations under the License.</p>
 <dt id="bbclib.libs.bbclib_utils.add_pointer_in_relation">
 <code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">add_pointer_in_relation</code><span class="sig-paren">(</span><em class="sig-param">relation</em>, <em class="sig-param">ref_transaction_id=None</em>, <em class="sig-param">ref_asset_id=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#add_pointer_in_relation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.add_pointer_in_relation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Utility to add BBcRelation object with BBcPointer in the BBcRelation object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>relation</strong> (<a class="reference internal" href="bbclib.compat.bbclib.html#bbclib.compat.bbclib.BBcRelation" title="bbclib.compat.bbclib.BBcRelation"><em>BBcRelation</em></a>) – BBcRelation object to manipulate</p></li>
+<li><p><strong>ref_transaction_id</strong> (<em>bytes</em>) – transaction_id of the transaction that the base transaction object refers to</p></li>
+<li><p><strong>ref_asset_id</strong> (<em>bytes</em>) – asset_id of the asset that the transaction object refers to</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -198,11 +207,19 @@ limitations under the License.</p>
 <code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">add_reference_to_transaction</code><span class="sig-paren">(</span><em class="sig-param">transaction</em>, <em class="sig-param">asset_group_id</em>, <em class="sig-param">ref_transaction_obj</em>, <em class="sig-param">event_index_in_ref</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#add_reference_to_transaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.add_reference_to_transaction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Utility to add BBcReference object in the transaction</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>transaction</strong> (<a class="reference internal" href="bbclib.compat.bbclib.html#bbclib.compat.bbclib.BBcTransaction" title="bbclib.compat.bbclib.BBcTransaction"><em>BBcTransaction</em></a>) – the base transaction object to manipulate</p></li>
+<li><p><strong>asset_group_id</strong> (<em>bytes</em>) – asset_group_id of the asset in the object</p></li>
+<li><p><strong>ref_transaction_obj</strong> (<a class="reference internal" href="bbclib.compat.bbclib.html#bbclib.compat.bbclib.BBcTransaction" title="bbclib.compat.bbclib.BBcTransaction"><em>BBcTransaction</em></a>) – the transaction object that the base transaction object refers to</p></li>
+<li><p><strong>event_index_in_ref</strong> (<em>int</em>) – the number of BBcEvent object to include in the transaction that the base transaction object refers to</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="bbclib.compat.bbclib.html#bbclib.compat.bbclib.BBcReference" title="bbclib.compat.bbclib.BBcReference">BBcReference</a></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="bbclib.compat.bbclib.html#bbclib.compat.bbclib.BBcReference" title="bbclib.compat.bbclib.BBcReference">BBcReference</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -211,12 +228,67 @@ limitations under the License.</p>
 <dt id="bbclib.libs.bbclib_utils.add_relation_asset">
 <code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">add_relation_asset</code><span class="sig-paren">(</span><em class="sig-param">transaction</em>, <em class="sig-param">relation_idx</em>, <em class="sig-param">asset_group_id</em>, <em class="sig-param">user_id</em>, <em class="sig-param">asset_body=None</em>, <em class="sig-param">asset_file=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#add_relation_asset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.add_relation_asset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Utility to add BBcRelation object with BBcAsset in the transaction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>transaction</strong> (<a class="reference internal" href="bbclib.compat.bbclib.html#bbclib.compat.bbclib.BBcTransaction" title="bbclib.compat.bbclib.BBcTransaction"><em>BBcTransaction</em></a>) – transaction object to manipulate</p></li>
+<li><p><strong>relation_idx</strong> (<em>int</em>) – the number of BBcRelation object to include in the transaction</p></li>
+<li><p><strong>asset_group_id</strong> (<em>bytes</em>) – asset_group_id of the asset in the object</p></li>
+<li><p><strong>user_id</strong> (<em>bytes</em>) – user_id of the owner of the asset</p></li>
+<li><p><strong>asset_body</strong> (<em>str|bytes|dict</em>) – asset data</p></li>
+<li><p><strong>asset_file</strong> (<em>bytes</em>) – file data (binary) for asset</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="bbclib.libs.bbclib_utils.add_relation_asset_hash">
+<code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">add_relation_asset_hash</code><span class="sig-paren">(</span><em class="sig-param">transaction</em>, <em class="sig-param">relation_idx</em>, <em class="sig-param">asset_group_id</em>, <em class="sig-param">asset_ids=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#add_relation_asset_hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.add_relation_asset_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility to add BBcRelation object with BBcAssetHash in the transaction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>transaction</strong> (<a class="reference internal" href="bbclib.compat.bbclib.html#bbclib.compat.bbclib.BBcTransaction" title="bbclib.compat.bbclib.BBcTransaction"><em>BBcTransaction</em></a>) – transaction object to manipulate</p></li>
+<li><p><strong>relation_idx</strong> (<em>int</em>) – the number of BBcRelation object to include in the transaction</p></li>
+<li><p><strong>asset_group_id</strong> (<em>bytes</em>) – asset_group_id of the asset in the object</p></li>
+<li><p><strong>asset_ids</strong> (<em>list</em><em>(</em><em>bytes</em><em>)</em>) – list of the identifiers of assets</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="bbclib.libs.bbclib_utils.add_relation_asset_raw">
+<code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">add_relation_asset_raw</code><span class="sig-paren">(</span><em class="sig-param">transaction</em>, <em class="sig-param">relation_idx</em>, <em class="sig-param">asset_group_id</em>, <em class="sig-param">asset_id=None</em>, <em class="sig-param">asset_body=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#add_relation_asset_raw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.add_relation_asset_raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility to add BBcRelation object with BBcAssetRaw in the transaction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>transaction</strong> (<a class="reference internal" href="bbclib.compat.bbclib.html#bbclib.compat.bbclib.BBcTransaction" title="bbclib.compat.bbclib.BBcTransaction"><em>BBcTransaction</em></a>) – transaction object to manipulate</p></li>
+<li><p><strong>relation_idx</strong> (<em>int</em>) – the number of BBcRelation object to include in the transaction</p></li>
+<li><p><strong>asset_group_id</strong> (<em>bytes</em>) – asset_group_id of the asset in the object</p></li>
+<li><p><strong>asset_id</strong> (<em>bytes</em>) – the identifier of the asset</p></li>
+<li><p><strong>asset_body</strong> (<em>str|bytes|dict</em>) – asset data</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="bbclib.libs.bbclib_utils.add_relation_pointer">
 <code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">add_relation_pointer</code><span class="sig-paren">(</span><em class="sig-param">transaction</em>, <em class="sig-param">relation_idx</em>, <em class="sig-param">ref_transaction_id=None</em>, <em class="sig-param">ref_asset_id=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#add_relation_pointer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.add_relation_pointer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Utility to add BBcRelation object with BBcPointer in the transaction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>transaction</strong> (<a class="reference internal" href="bbclib.compat.bbclib.html#bbclib.compat.bbclib.BBcTransaction" title="bbclib.compat.bbclib.BBcTransaction"><em>BBcTransaction</em></a>) – the base transaction object to manipulate</p></li>
+<li><p><strong>relation_idx</strong> (<em>int</em>) – the number of BBcRelation object to include in the transaction</p></li>
+<li><p><strong>ref_transaction_id</strong> (<em>bytes</em>) – transaction_id of the transaction that the base transaction object refers to</p></li>
+<li><p><strong>ref_asset_id</strong> (<em>bytes</em>) – asset_id of the asset that the transaction object refers to</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -228,12 +300,40 @@ limitations under the License.</p>
 <dt id="bbclib.libs.bbclib_utils.convert_id_to_string">
 <code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">convert_id_to_string</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">bytelen=32</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#convert_id_to_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.convert_id_to_string" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert binary data to hex string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>bytes</em>) – data to convert</p></li>
+<li><p><strong>bytelen</strong> (<em>int</em>) – length of the result</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>converted string</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="bbclib.libs.bbclib_utils.convert_idstring_to_bytes">
 <code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">convert_idstring_to_bytes</code><span class="sig-paren">(</span><em class="sig-param">datastr</em>, <em class="sig-param">bytelen=32</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#convert_idstring_to_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.convert_idstring_to_bytes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert hex string to binary data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datastr</strong> (<em>str</em>) – data to convert</p></li>
+<li><p><strong>bytelen</strong> (<em>int</em>) – length of the result</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>converted byte data</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bytes</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -294,18 +394,86 @@ limitations under the License.</p>
 <dl class="function">
 <dt id="bbclib.libs.bbclib_utils.get_random_value">
 <code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">get_random_value</code><span class="sig-paren">(</span><em class="sig-param">length=32</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#get_random_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.get_random_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return 1-byte random value</p>
+<dd><p>Return random bytes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>length</strong> (<em>int</em>) – length of the result</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>random bytes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bytes</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="bbclib.libs.bbclib_utils.make_relation_with_asset">
 <code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">make_relation_with_asset</code><span class="sig-paren">(</span><em class="sig-param">asset_group_id</em>, <em class="sig-param">user_id</em>, <em class="sig-param">asset_body=None</em>, <em class="sig-param">asset_file=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#make_relation_with_asset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.make_relation_with_asset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Utility to make BBcRelation object</p>
+<dd><p>Utility to make BBcRelation object with BBcAsset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>asset_group_id</strong> (<em>bytes</em>) – asset_group_id of the asset in the object</p></li>
+<li><p><strong>user_id</strong> (<em>bytes</em>) – user_id of the owner of the asset</p></li>
+<li><p><strong>asset_body</strong> (<em>str|bytes|dict</em>) – asset data</p></li>
+<li><p><strong>asset_file</strong> (<em>bytes</em>) – file data (binary) for asset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>created BBcRelation object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="bbclib.compat.bbclib.html#bbclib.compat.bbclib.BBcRelation" title="bbclib.compat.bbclib.BBcRelation">BBcRelation</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="bbclib.libs.bbclib_utils.make_relation_with_asset_hash">
+<code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">make_relation_with_asset_hash</code><span class="sig-paren">(</span><em class="sig-param">asset_group_id</em>, <em class="sig-param">asset_ids=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#make_relation_with_asset_hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.make_relation_with_asset_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility to make BBcRelation object with BBcAssetHash</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>asset_group_id</strong> (<em>bytes</em>) – asset_group_id of the asset in the object</p></li>
+<li><p><strong>asset_ids</strong> (<em>list</em><em>(</em><em>bytes</em><em>)</em>) – list of the identifiers of assets</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>created BBcRelation object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="bbclib.compat.bbclib.html#bbclib.compat.bbclib.BBcRelation" title="bbclib.compat.bbclib.BBcRelation">BBcRelation</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="bbclib.libs.bbclib_utils.make_relation_with_asset_raw">
+<code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">make_relation_with_asset_raw</code><span class="sig-paren">(</span><em class="sig-param">asset_group_id</em>, <em class="sig-param">asset_id=None</em>, <em class="sig-param">asset_body=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#make_relation_with_asset_raw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.make_relation_with_asset_raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility to make BBcRelation object with BBcAssetRaw</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>asset_group_id</strong> (<em>bytes</em>) – asset_group_id of the asset in the object</p></li>
+<li><p><strong>asset_id</strong> (<em>bytes</em>) – the identifier of the asset</p></li>
+<li><p><strong>asset_body</strong> (<em>str|bytes|dict</em>) – asset data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>created BBcRelation object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="bbclib.compat.bbclib.html#bbclib.compat.bbclib.BBcRelation" title="bbclib.compat.bbclib.BBcRelation">BBcRelation</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="bbclib.libs.bbclib_utils.make_transaction">
-<code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">make_transaction</code><span class="sig-paren">(</span><em class="sig-param">event_num=0</em>, <em class="sig-param">relation_num=0</em>, <em class="sig-param">witness=False</em>, <em class="sig-param">id_length=32</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#make_transaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.make_transaction" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">make_transaction</code><span class="sig-paren">(</span><em class="sig-param">event_num=0</em>, <em class="sig-param">relation_num=0</em>, <em class="sig-param">witness=False</em>, <em class="sig-param">version=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#make_transaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.make_transaction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Utility to make transaction object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -313,7 +481,7 @@ limitations under the License.</p>
 <li><p><strong>event_num</strong> (<em>int</em>) – the number of BBcEvent object to include in the transaction</p></li>
 <li><p><strong>relation_num</strong> (<em>int</em>) – the number of BBcRelation object to include in the transaction</p></li>
 <li><p><strong>witness</strong> (<em>bool</em>) – If true, BBcWitness object is included in the transaction</p></li>
-<li><p><strong>id_length</strong> (<em>int</em>) – If &lt;32, IDs will be truncated (this params is for the backward compatibility)</p></li>
+<li><p><strong>version</strong> (<em>int</em>) – version of the transaction format</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -329,6 +497,17 @@ limitations under the License.</p>
 <dt id="bbclib.libs.bbclib_utils.recover_signature_object">
 <code class="sig-prename descclassname">bbclib.libs.bbclib_utils.</code><code class="sig-name descname">recover_signature_object</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_utils.html#recover_signature_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_utils.recover_signature_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unpack signature data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>bytes</em>) – Serialized data of BBcSignature object</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>BBcSignature object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="bbclib.compat.bbclib.html#bbclib.compat.bbclib.BBcSignature" title="bbclib.compat.bbclib.BBcSignature">BBcSignature</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">

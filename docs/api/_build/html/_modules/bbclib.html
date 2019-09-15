@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bbclib &mdash; py-bbclib 1.4.1 documentation</title>
+  <title>bbclib &mdash; py-bbclib 1.5 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                1.4.1
+                1.5
               </div>
             
           
@@ -190,6 +190,8 @@
 <span class="kn">import</span> <span class="nn">bbclib.libs.bbclib_signature</span> <span class="k">as</span> <span class="nn">bbclib_signature</span>
 <span class="kn">import</span> <span class="nn">bbclib.libs.bbclib_keypair</span> <span class="k">as</span> <span class="nn">bbclib_keypair</span>
 <span class="kn">import</span> <span class="nn">bbclib.libs.bbclib_asset</span> <span class="k">as</span> <span class="nn">bbclib_asset</span>
+<span class="kn">import</span> <span class="nn">bbclib.libs.bbclib_asset_raw</span> <span class="k">as</span> <span class="nn">bbclib_asset_raw</span>
+<span class="kn">import</span> <span class="nn">bbclib.libs.bbclib_asset_hash</span> <span class="k">as</span> <span class="nn">bbclib_asset_hash</span>
 <span class="kn">import</span> <span class="nn">bbclib.libs.bbclib_crossref</span> <span class="k">as</span> <span class="nn">bbclib_crossref</span>
 <span class="kn">import</span> <span class="nn">bbclib.libs.bbclib_event</span> <span class="k">as</span> <span class="nn">bbclib_event</span>
 <span class="kn">import</span> <span class="nn">bbclib.libs.bbclib_msgtype</span> <span class="k">as</span> <span class="nn">bbclib_msgtype</span>
@@ -277,10 +279,14 @@
 <span class="n">deep_copy_with_key_stringify</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">deep_copy_with_key_stringify</span>
 <span class="n">make_transaction</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">make_transaction</span>
 <span class="n">add_relation_asset</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">add_relation_asset</span>
+<span class="n">add_relation_asset_raw</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">add_relation_asset_raw</span>
+<span class="n">add_relation_asset_hash</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">add_relation_asset_hash</span>
 <span class="n">add_relation_pointer</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">add_relation_pointer</span>
 <span class="n">add_reference_to_transaction</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">add_reference_to_transaction</span>
 <span class="n">add_event_asset</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">add_event_asset</span>
 <span class="n">make_relation_with_asset</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">make_relation_with_asset</span>
+<span class="n">make_relation_with_asset_raw</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">make_relation_with_asset_raw</span>
+<span class="n">make_relation_with_asset_hash</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">make_relation_with_asset_hash</span>
 <span class="n">add_pointer_in_relation</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">add_pointer_in_relation</span>
 <span class="n">recover_signature_object</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">recover_signature_object</span>
 <span class="n">validate_transaction_object</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">validate_transaction_object</span>
@@ -300,6 +306,8 @@
 <span class="n">BBcPointer</span> <span class="o">=</span> <span class="n">bbclib_pointer</span><span class="o">.</span><span class="n">BBcPointer</span>
 <span class="n">BBcWitness</span> <span class="o">=</span> <span class="n">bbclib_witness</span><span class="o">.</span><span class="n">BBcWitness</span>
 <span class="n">BBcAsset</span> <span class="o">=</span> <span class="n">bbclib_asset</span><span class="o">.</span><span class="n">BBcAsset</span>
+<span class="n">BBcAssetRaw</span> <span class="o">=</span> <span class="n">bbclib_asset_raw</span><span class="o">.</span><span class="n">BBcAssetRaw</span>
+<span class="n">BBcAssetHash</span> <span class="o">=</span> <span class="n">bbclib_asset_hash</span><span class="o">.</span><span class="n">BBcAssetHash</span>
 <span class="n">BBcCrossRef</span> <span class="o">=</span> <span class="n">bbclib_crossref</span><span class="o">.</span><span class="n">BBcCrossRef</span>
 </pre></div>
 

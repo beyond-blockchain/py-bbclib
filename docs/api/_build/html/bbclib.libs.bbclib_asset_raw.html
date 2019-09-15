@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bbclib.libs.bbclib_crossref module &mdash; py-bbclib 1.5 documentation</title>
+  <title>bbclib.libs.bbclib_asset_raw module &mdash; py-bbclib 1.5 documentation</title>
   
 
   
@@ -34,9 +34,7 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bbclib.libs.bbclib_error module" href="bbclib.libs.bbclib_error.html" />
-    <link rel="prev" title="bbclib.libs.bbclib_config module" href="bbclib.libs.bbclib_config.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -85,20 +83,8 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="bbclib.html">bbclib package</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="bbclib.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="bbclib.compat.html">bbclib.compat package</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="bbclib.libs.html">bbclib.libs package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="bbclib.libs.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bbclib.libs.html#module-bbclib.libs">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="bbclib.html#module-bbclib">Module contents</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bbclib.html">bbclib package</a></li>
 </ul>
 
             
@@ -144,17 +130,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="bbclib.html">bbclib package</a> &raquo;</li>
-        
-          <li><a href="bbclib.libs.html">bbclib.libs package</a> &raquo;</li>
-        
-      <li>bbclib.libs.bbclib_crossref module</li>
+      <li>bbclib.libs.bbclib_asset_raw module</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/bbclib.libs.bbclib_crossref.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/bbclib.libs.bbclib_asset_raw.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -167,9 +149,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-bbclib.libs.bbclib_crossref">
-<span id="bbclib-libs-bbclib-crossref-module"></span><h1>bbclib.libs.bbclib_crossref module<a class="headerlink" href="#module-bbclib.libs.bbclib_crossref" title="Permalink to this headline">¶</a></h1>
-<p>Copyright (c) 2018 beyond-blockchain.org.</p>
+  <div class="section" id="module-bbclib.libs.bbclib_asset_raw">
+<span id="bbclib-libs-bbclib-asset-raw-module"></span><h1>bbclib.libs.bbclib_asset_raw module<a class="headerlink" href="#module-bbclib.libs.bbclib_asset_raw" title="Permalink to this headline">¶</a></h1>
+<p>Copyright (c) 2019 beyond-blockchain.org.</p>
 <p>Licensed under the Apache License, Version 2.0 (the “License”);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at</p>
@@ -182,13 +164,36 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.</p>
 <dl class="class">
-<dt id="bbclib.libs.bbclib_crossref.BBcCrossRef">
-<em class="property">class </em><code class="sig-prename descclassname">bbclib.libs.bbclib_crossref.</code><code class="sig-name descname">BBcCrossRef</code><span class="sig-paren">(</span><em class="sig-param">domain_id=None</em>, <em class="sig-param">transaction_id=None</em>, <em class="sig-param">unpack=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_crossref.html#BBcCrossRef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_crossref.BBcCrossRef" title="Permalink to this definition">¶</a></dt>
+<dt id="bbclib.libs.bbclib_asset_raw.BBcAssetRaw">
+<em class="property">class </em><code class="sig-prename descclassname">bbclib.libs.bbclib_asset_raw.</code><code class="sig-name descname">BBcAssetRaw</code><span class="sig-paren">(</span><em class="sig-param">asset_id=None</em>, <em class="sig-param">asset_body=None</em>, <em class="sig-param">id_length=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_asset_raw.html#BBcAssetRaw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_asset_raw.BBcAssetRaw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>CrossRef part in a transaction</p>
+<p>AssetRaw part in a transaction</p>
+<p>In this object, asset_id should be given externally, meaning that this object does not care about how to calculate the digest.</p>
 <dl class="method">
-<dt id="bbclib.libs.bbclib_crossref.BBcCrossRef.pack">
-<code class="sig-name descname">pack</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_crossref.html#BBcCrossRef.pack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_crossref.BBcCrossRef.pack" title="Permalink to this definition">¶</a></dt>
+<dt id="bbclib.libs.bbclib_asset_raw.BBcAssetRaw.add">
+<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param">asset_id=None</em>, <em class="sig-param">asset_body=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_asset_raw.html#BBcAssetRaw.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_asset_raw.BBcAssetRaw.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add parts in this object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bbclib.libs.bbclib_asset_raw.BBcAssetRaw.digest">
+<code class="sig-name descname">digest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_asset_raw.html#BBcAssetRaw.digest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_asset_raw.BBcAssetRaw.digest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return digest</p>
+<p>The digest corresponds to the asset_id of this object.
+The asset_id is given externally, so bbclib does not care about how to calculate the digest of the asset_body.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>asset_id</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="bbclib.libs.bbclib_asset_raw.BBcAssetRaw.pack">
+<code class="sig-name descname">pack</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_asset_raw.html#BBcAssetRaw.pack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_asset_raw.BBcAssetRaw.pack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pack this object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -201,8 +206,8 @@ limitations under the License.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bbclib.libs.bbclib_crossref.BBcCrossRef.unpack">
-<code class="sig-name descname">unpack</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_crossref.html#BBcCrossRef.unpack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_crossref.BBcCrossRef.unpack" title="Permalink to this definition">¶</a></dt>
+<dt id="bbclib.libs.bbclib_asset_raw.BBcAssetRaw.unpack">
+<code class="sig-name descname">unpack</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bbclib/libs/bbclib_asset_raw.html#BBcAssetRaw.unpack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bbclib.libs.bbclib_asset_raw.BBcAssetRaw.unpack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unpack into this object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -226,15 +231,6 @@ limitations under the License.</p>
            
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="bbclib.libs.bbclib_error.html" class="btn btn-neutral float-right" title="bbclib.libs.bbclib_error module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="bbclib.libs.bbclib_config.html" class="btn btn-neutral float-left" title="bbclib.libs.bbclib_config module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
   
 
   <hr/>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bbclib.libs.bbclib_relation &mdash; py-bbclib 1.4.1 documentation</title>
+  <title>bbclib.libs.bbclib_relation &mdash; py-bbclib 1.5 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                1.4.1
+                1.5
               </div>
             
           
@@ -175,13 +175,16 @@
 <span class="kn">from</span> <span class="nn">bbclib.libs</span> <span class="k">import</span> <span class="n">bbclib_utils</span>
 <span class="kn">from</span> <span class="nn">bbclib.libs.bbclib_pointer</span> <span class="k">import</span> <span class="n">BBcPointer</span>
 <span class="kn">from</span> <span class="nn">bbclib.libs.bbclib_asset</span> <span class="k">import</span> <span class="n">BBcAsset</span>
+<span class="kn">from</span> <span class="nn">bbclib.libs.bbclib_asset_raw</span> <span class="k">import</span> <span class="n">BBcAssetRaw</span>
+<span class="kn">from</span> <span class="nn">bbclib.libs.bbclib_asset_hash</span> <span class="k">import</span> <span class="n">BBcAssetHash</span>
 <span class="kn">import</span> <span class="nn">bbclib</span>
 <span class="kn">from</span> <span class="nn">bbclib</span> <span class="k">import</span> <span class="n">id_length_conf</span>
 
 
 <div class="viewcode-block" id="BBcRelation"><a class="viewcode-back" href="../../../bbclib.libs.bbclib_relation.html#bbclib.libs.bbclib_relation.BBcRelation">[docs]</a><span class="k">class</span> <span class="nc">BBcRelation</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Relation part in a transaction&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">asset_group_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">id_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">asset_group_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">id_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
         <span class="k">if</span> <span class="n">id_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">bbclib</span><span class="o">.</span><span class="n">configure_id_length_all</span><span class="p">(</span><span class="n">id_length</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">asset_group_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -190,6 +193,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">asset_group_id</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pointers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">asset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">asset_raw</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">asset_hash</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">=</span>  <span class="s2">&quot;  asset_group_id: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">str_binary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asset_group_id</span><span class="p">)</span>
@@ -198,10 +203,15 @@
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pointers</span><span class="p">):</span>
                 <span class="n">ret</span> <span class="o">+=</span> <span class="s2">&quot;   [</span><span class="si">%d</span><span class="s2">]</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">i</span>
                 <span class="n">ret</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
-        <span class="n">ret</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">asset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">asset_raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asset_raw</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">asset_hash</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asset_hash</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
-<div class="viewcode-block" id="BBcRelation.add"><a class="viewcode-back" href="../../../bbclib.libs.bbclib_relation.html#bbclib.libs.bbclib_relation.BBcRelation.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">asset_group_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">asset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pointer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="BBcRelation.add"><a class="viewcode-back" href="../../../bbclib.libs.bbclib_relation.html#bbclib.libs.bbclib_relation.BBcRelation.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">asset_group_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">asset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">asset_raw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">asset_hash</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pointer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add parts&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">asset_group_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">asset_group_id</span> <span class="o">=</span> <span class="n">asset_group_id</span><span class="p">[:</span><span class="n">id_length_conf</span><span class="p">[</span><span class="s2">&quot;asset_group_id&quot;</span><span class="p">]]</span>
@@ -212,6 +222,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">pointers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointer</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">asset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">asset</span> <span class="o">=</span> <span class="n">asset</span>
+        <span class="k">if</span> <span class="n">asset_raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">asset_raw</span> <span class="o">=</span> <span class="n">asset_raw</span>
+        <span class="k">if</span> <span class="n">asset_hash</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">asset_hash</span> <span class="o">=</span> <span class="n">asset_hash</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="BBcRelation.pack"><a class="viewcode-back" href="../../../bbclib.libs.bbclib_relation.html#bbclib.libs.bbclib_relation.BBcRelation.pack">[docs]</a>    <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -232,17 +246,32 @@
             <span class="n">dat</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dat</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">bbclib_utils</span><span class="o">.</span><span class="n">to_4byte</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">asset_raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ast</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">asset_raw</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+                <span class="n">dat</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">bbclib_utils</span><span class="o">.</span><span class="n">to_4byte</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ast</span><span class="p">)))</span>
+                <span class="n">dat</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dat</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">bbclib_utils</span><span class="o">.</span><span class="n">to_4byte</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">asset_hash</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ast</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">asset_hash</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+                <span class="n">dat</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">bbclib_utils</span><span class="o">.</span><span class="n">to_4byte</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ast</span><span class="p">)))</span>
+                <span class="n">dat</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dat</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">bbclib_utils</span><span class="o">.</span><span class="n">to_4byte</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
         <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">dat</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BBcRelation.unpack"><a class="viewcode-back" href="../../../bbclib.libs.bbclib_relation.html#bbclib.libs.bbclib_relation.BBcRelation.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="BBcRelation.unpack"><a class="viewcode-back" href="../../../bbclib.libs.bbclib_relation.html#bbclib.libs.bbclib_relation.BBcRelation.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Unpack data into transaction object</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data (bytes): packed binary data</span>
+<span class="sd">            version (int): version of the data format</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if successful</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ptr</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
         <span class="n">data_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">ptr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">asset_group_id</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">get_bigint</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -265,6 +294,23 @@
                 <span class="n">ptr</span><span class="p">,</span> <span class="n">astdata</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">get_n_bytes</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="n">astsize</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">asset</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">astdata</span><span class="p">):</span>
                     <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">version</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">asset_raw</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">ptr</span><span class="p">,</span> <span class="n">astsize</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">get_n_byte_int</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">astsize</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">asset_raw</span> <span class="o">=</span> <span class="n">BBcAssetRaw</span><span class="p">()</span>
+                    <span class="n">ptr</span><span class="p">,</span> <span class="n">astdata</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">get_n_bytes</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="n">astsize</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">asset_raw</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">astdata</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="kc">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">asset_hash</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">ptr</span><span class="p">,</span> <span class="n">astsize</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">get_n_byte_int</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">astsize</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">asset_hash</span> <span class="o">=</span> <span class="n">BBcAssetHash</span><span class="p">()</span>
+                    <span class="n">ptr</span><span class="p">,</span> <span class="n">astdata</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">get_n_bytes</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="n">astsize</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">asset_hash</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">astdata</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="kc">False</span>
+
         <span class="k">except</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span></div></div>

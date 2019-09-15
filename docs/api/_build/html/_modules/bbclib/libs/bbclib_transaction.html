@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bbclib.libs.bbclib_transaction &mdash; py-bbclib 1.4.1 documentation</title>
+  <title>bbclib.libs.bbclib_transaction &mdash; py-bbclib 1.5 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                1.4.1
+                1.5
               </div>
             
           
@@ -267,6 +267,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">relations</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">relation</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">relations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">relation</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">rtn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">relations</span><span class="p">:</span>
+                <span class="n">rtn</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span>
         <span class="k">if</span> <span class="n">witness</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">witness</span><span class="o">.</span><span class="n">transaction</span> <span class="o">=</span> <span class="bp">self</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">witness</span> <span class="o">=</span> <span class="n">witness</span>
@@ -429,12 +431,18 @@
                 <span class="n">ptr</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">get_n_byte_int</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
                 <span class="n">ptr</span><span class="p">,</span> <span class="n">rtndata</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">get_n_bytes</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
                 <span class="n">rtn</span> <span class="o">=</span> <span class="n">BBcRelation</span><span class="p">()</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">rtn</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">rtndata</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">rtn</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">rtndata</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">):</span>
                     <span class="k">return</span> <span class="kc">False</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">relations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rtn</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">ptr</span> <span class="o">&gt;=</span> <span class="n">data_size</span><span class="p">:</span>
                     <span class="k">return</span> <span class="kc">False</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">asset_group_ids</span><span class="p">[</span><span class="n">rtn</span><span class="o">.</span><span class="n">asset</span><span class="o">.</span><span class="n">asset_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">rtn</span><span class="o">.</span><span class="n">asset_group_id</span>
+                <span class="k">if</span> <span class="n">rtn</span><span class="o">.</span><span class="n">asset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">asset_group_ids</span><span class="p">[</span><span class="n">rtn</span><span class="o">.</span><span class="n">asset</span><span class="o">.</span><span class="n">asset_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">rtn</span><span class="o">.</span><span class="n">asset_group_id</span>
+                <span class="k">if</span> <span class="n">rtn</span><span class="o">.</span><span class="n">asset_raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">asset_group_ids</span><span class="p">[</span><span class="n">rtn</span><span class="o">.</span><span class="n">asset_raw</span><span class="o">.</span><span class="n">asset_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">rtn</span><span class="o">.</span><span class="n">asset_group_id</span>
+                <span class="k">if</span> <span class="n">rtn</span><span class="o">.</span><span class="n">asset_hash</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">rtn</span><span class="o">.</span><span class="n">asset_hash</span><span class="o">.</span><span class="n">asset_ids</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">asset_group_ids</span><span class="p">[</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">rtn</span><span class="o">.</span><span class="n">asset_group_id</span>
 
             <span class="n">ptr</span><span class="p">,</span> <span class="n">witness_num</span> <span class="o">=</span> <span class="n">bbclib_utils</span><span class="o">.</span><span class="n">get_n_byte_int</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">witness_num</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
