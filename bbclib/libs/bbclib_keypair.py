@@ -19,6 +19,12 @@ import os
 import platform
 import binascii
 
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import ec, utils
+from cryptography import x509
+import cryptography
+
 current_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(current_dir, "../.."))
 
@@ -31,6 +37,12 @@ elif platform.system() == "Darwin":
     libbbcsig = cdll.LoadLibrary(os.path.join(directory, "libbbcsig.dylib"))
 else:
     libbbcsig = cdll.LoadLibrary(os.path.join(directory, "libbbcsig.so"))
+
+
+def _convert_binary_to_bigint(bindat):
+    bn = BACKEND_KP.private_key_obj._backend._ffi.NULL
+    bn_ptr = BACKEND_KP.private_key_obj._backend._lib.BN_bin2bn(bindat, len(bindat), bn)
+    return BACKEND_KP.private_key_obj._backend._bn_to_int(bn_ptr)
 
 
 class KeyType:
@@ -46,72 +58,115 @@ class KeyPair:
     """Key pair container"""
     def __init__(self, curvetype=KeyType.ECDSA_P256v1, compression=False, privkey=None, pubkey=None):
         self.curvetype = curvetype
-        self.private_key_len = c_int32(32)
-        self.private_key = (c_byte * self.private_key_len.value)()
+        self.private_key_len = None
+        self.private_key = None
+
+        self.private_key_obj = None
+        self.public_key_obj = None
+        self.public_key_len = None
+        self.public_key = None
         if compression:
-            self.public_key_len = c_int32(33)
             self.key_compression = KeyPair.POINT_CONVERSION_COMPRESSED
         else:
-            self.public_key_len = c_int32(65)
             self.key_compression = KeyPair.POINT_CONVERSION_UNCOMPRESSED
-        self.public_key = (c_byte * self.public_key_len.value)()
+
         if privkey is not None:
-            memmove(self.private_key, bytes(privkey), sizeof(self.private_key))
+            self.mk_keyobj_from_private_key(privkey)
         if pubkey is not None:
-            self.public_key_len = c_int32(len(pubkey))
-            memmove(self.public_key, bytes(pubkey), self.public_key_len.value)
+            self._mk_keyobj_from_public_key(pubkey)
+            self.public_key_len = len(pubkey)
+            self.public_key = pubkey
+
+    def _get_naive_private_key_bytes(self):
+        if self.private_key_obj is None:
+            return
+        if self.private_key_obj.curve.name == ec.SECP256R1().name:
+            self.curvetype = KeyType.ECDSA_P256v1
+        elif self.private_key_obj.curve.name == ec.SECP256K1().name:
+            self.curvetype = KeyType.ECDSA_SECP256k1
+        else:
+            return
+        bn = self.private_key_obj._backend._lib.EC_KEY_get0_private_key(self.private_key_obj._ec_key)
+        bn_num_bytes = self.private_key_obj._backend._lib.BN_num_bytes(bn)
+        bin_ptr = self.private_key_obj._backend._ffi.new("unsigned char[]", bn_num_bytes)
+        bin_len = self.private_key_obj._backend._lib.BN_bn2bin(bn, bin_ptr)
+        self.private_key = bytes(bin_ptr)
+        self.private_key_len = bin_len
+
+    def _get_naive_public_key_bytes(self):
+        if self.public_key_obj is None:
+            return
+        if self.key_compression == KeyPair.POINT_CONVERSION_COMPRESSED:
+            self.public_key = self.public_key_obj.public_bytes(serialization.Encoding.X962, serialization.PublicFormat.CompressedPoint)
+        else:
+            self.public_key = self.public_key_obj.public_bytes(serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint)
+        self.public_key_len = len(self.public_key)
+
+    def _mk_keyobj_from_public_key(self, pubkey):
+        if self.curvetype == KeyType.ECDSA_P256v1:
+            self.public_key_obj = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256R1(), pubkey)
+        elif self.curvetype == KeyType.ECDSA_SECP256k1:
+            self.public_key_obj = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256K1(), pubkey)
+        else:
+            return
 
     def generate(self):
         """Generate a new key pair"""
-        libbbcsig.generate_keypair(self.curvetype, self.key_compression, byref(self.public_key_len), self.public_key,
-                                   byref(self.private_key_len), self.private_key)
+        if self.curvetype == KeyType.ECDSA_P256v1:
+            self.private_key_obj = ec.generate_private_key(ec.SECP256R1(), default_backend())
+        elif self.curvetype == KeyType.ECDSA_SECP256k1:
+            self.private_key_obj = ec.generate_private_key(ec.SECP256K1(), default_backend())
+        self.public_key_obj = self.private_key_obj.public_key()
+        self._get_naive_private_key_bytes()
+        self._get_naive_public_key_bytes()
 
-    def mk_keyobj_from_private_key(self):
+    def mk_keyobj_from_private_key(self, privkey):
         """Make a keypair object from the binary data of private key"""
-        if self.private_key is None:
-            return
-        libbbcsig.get_public_key_uncompressed(self.curvetype, self.private_key_len, self.private_key,
-                                              byref(self.public_key_len), self.public_key)
+        bn = BACKEND_KP.private_key_obj._backend._ffi.NULL
+        bn_ptr = BACKEND_KP.private_key_obj._backend._lib.BN_bin2bn(privkey, len(privkey), bn)
+        secret_val = BACKEND_KP.private_key_obj._backend._bn_to_int(bn_ptr)
+
+        if self.curvetype == KeyType.ECDSA_P256v1:
+            self.private_key_obj = ec.derive_private_key(secret_val, ec.SECP256R1(), default_backend())
+        elif self.curvetype == KeyType.ECDSA_SECP256k1:
+            self.private_key_obj = ec.derive_private_key(secret_val, ec.SECP256K1(), default_backend())
+        self._get_naive_private_key_bytes()
+        self.public_key_obj = self.private_key_obj.public_key()
+        self._get_naive_public_key_bytes()
 
     def mk_keyobj_from_private_key_der(self, derdat):
         """Make a keypair object from the private key in DER format"""
-        der_len = len(derdat)
-        der_data = (c_byte * der_len)()
-        curvetype = c_int(0)
-        memmove(der_data, bytes(derdat), der_len)
-        libbbcsig.convert_from_der_with_curvetype(
-                der_len, byref(der_data), self.key_compression, byref(curvetype),
-                byref(self.public_key_len), self.public_key,
-                byref(self.private_key_len), self.private_key)
-        self.curvetype = curvetype.value
+        self.private_key_obj = serialization.load_der_private_key(derdat, password=None, backend=default_backend())
+        self._get_naive_private_key_bytes()
+        self.curvetype = self.private_key
+        self.public_key_obj = self.private_key_obj.public_key()
+        self._get_naive_public_key_bytes()
 
     def mk_keyobj_from_private_key_pem(self, pemdat_string):
         """Make a keypair object from the private key in PEM format"""
-        curvetype = c_int(0)
-        libbbcsig.convert_from_pem_with_curvetype(
-                create_string_buffer(pemdat_string.encode()), self.key_compression, byref(curvetype),
-                byref(self.public_key_len), self.public_key,
-                byref(self.private_key_len), self.private_key)
-        self.curvetype = curvetype.value
+        self.private_key_obj = serialization.load_pem_private_key(pemdat_string, password=None, backend=default_backend())
+        self._get_naive_private_key_bytes()
+        self.curvetype = self.private_key
+        self.public_key_obj = self.private_key_obj.public_key()
+        self._get_naive_public_key_bytes()
 
     def import_publickey_cert_pem(self, cert_pemstring, privkey_pemstring=None):
         """Verify and import X509 public key certificate in pem format"""
-        if privkey_pemstring is not None:
-            ret = libbbcsig.verify_x509(create_string_buffer(cert_pemstring.encode()),
-                                        create_string_buffer(privkey_pemstring.encode()))
-        else:
-            ret = libbbcsig.verify_x509(create_string_buffer(cert_pemstring.encode()), None)
-        if ret != 1:
-            return False
+        ## TODO: This method is not tested. It may have bugs.
+        cert = x509.load_pem_x509_certificate(cert_pemstring.encode('utf-8'), default_backend())
+        fingerprint = cert.fingerprint(hashes.SHA256())
 
         if privkey_pemstring is not None:
             self.mk_keyobj_from_private_key_pem(privkey_pemstring)
-        else:
-            curvetype = c_int(0)
-            ret = libbbcsig.read_x509_with_curvetype(create_string_buffer(cert_pemstring.encode()), self.key_compression, byref(curvetype), byref(self.public_key_len), self.public_key)
-            self.curvetype = curvetype.value
-            if ret != 1:
+            sig = self.private_key_obj.sign(fingerprint, ec.ECDSA(utils.Prehashed(hashes.SHA256())))
+            public_key = cert.public_key()
+            result = public_key.verify(sig, fingerprint, ec.ECDSA(hashes.SHA256()))
+            if not result:
                 return False
+            self.private_key_obj = public_key
+            self._get_naive_private_key_bytes()
+
+        self._get_naive_public_key_bytes()
         return True
 
     def to_binary(self, dat):
@@ -130,27 +185,37 @@ class KeyPair:
 
     def get_private_key_in_der(self):
         """Return private key in DER format"""
-        der_data = (c_byte * 512)()     # 256 -> 512
-        der_len = libbbcsig.output_der(self.curvetype, self.private_key_len, self.private_key, byref(der_data))
-        return bytes(bytearray(der_data)[:der_len])
+        serialized_private = self.private_key_obj.private_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+        return serialized_private
 
     def get_public_key_in_der(self):
         """Return private key in DER format"""
-        der_data = (c_byte * 512)()     # 256 -> 512
-        der_len = libbbcsig.output_public_key_der(self.curvetype, self.public_key_len, self.public_key, byref(der_data))
-        return bytes(bytearray(der_data)[:der_len])
+        serialized_public = self.public_key_obj.public_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        return serialized_public
 
     def get_private_key_in_pem(self):
         """Return private key in PEM format"""
-        pem_data = (c_char * 512)()     # 256 -> 512
-        pem_len = libbbcsig.output_pem(self.curvetype, self.private_key_len, self.private_key, byref(pem_data))
-        return pem_data.value
+        serialized_private = self.private_key_obj.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+        return serialized_private
 
     def get_public_key_in_pem(self):
         """Return public key in PEM format"""
-        pem_data = (c_char * 512)()     # 256 -> 512
-        pem_len = libbbcsig.output_public_key_pem(self.curvetype, self.public_key_len, self.public_key, byref(pem_data))
-        return pem_data.value
+        serialized_public = self.public_key_obj.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        return serialized_public
 
     def sign(self, digest):
         """Sign to the given value
@@ -160,19 +225,23 @@ class KeyPair:
         Returns:
             bytes: signature
         """
-        sig_r = (c_byte * 32)()
-        sig_s = (c_byte * 32)()
-        sig_r_len = (c_byte * 4)()  # Adjust size according to the expected size of sig_r and sig_s. Default:uint32.
-        sig_s_len = (c_byte * 4)()
-        libbbcsig.sign(self.curvetype, self.private_key_len, self.private_key, len(digest), digest,
-                       sig_r, sig_s, sig_r_len, sig_s_len)
-        sig_r_len = int.from_bytes(bytes(sig_r_len), "little")
-        sig_s_len = int.from_bytes(bytes(sig_s_len), "little")
-        sig_r = binascii.a2b_hex("00"*(32-sig_r_len) + bytes(sig_r)[:sig_r_len].hex())
-        sig_s = binascii.a2b_hex("00"*(32-sig_s_len) + bytes(sig_s)[:sig_s_len].hex())
+        sig = self.private_key_obj.sign(digest, ec.ECDSA(utils.Prehashed(hashes.SHA256())))
+        sig_rs = utils.decode_dss_signature(sig)
+        sig_r = int.to_bytes(sig_rs[0], 32, "big")
+        sig_s = int.to_bytes(sig_rs[1], 32, "big")
         return bytes(bytearray(sig_r)+bytearray(sig_s))
 
     def verify(self, digest, sig):
-        """Verify the digest and the signature using the rivate key in this object"""
-        return libbbcsig.verify(self.curvetype, self.public_key_len, self.public_key, len(digest), digest, len(sig), sig)
+        """Verify the digest and the signature using the private key in this object"""
+        sig_r = sig[:32]
+        sig_s = sig[32:]
+        signature = utils.encode_dss_signature(_convert_binary_to_bigint(sig_r), _convert_binary_to_bigint(sig_s))
+        try:
+            self.public_key_obj.verify(signature, digest, ec.ECDSA(utils.Prehashed(hashes.SHA256())))
+        except cryptography.exceptions.InvalidSignature:
+            return False
+        return True
 
+
+BACKEND_KP = KeyPair()
+BACKEND_KP.generate()
