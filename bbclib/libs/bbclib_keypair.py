@@ -17,7 +17,6 @@ limitations under the License.
 import sys
 import os
 import platform
-import binascii
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
@@ -27,16 +26,6 @@ import cryptography
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(current_dir, "../.."))
-
-directory, filename = os.path.split(os.path.realpath(__file__))
-from ctypes import *
-
-if platform.system() == "Windows":
-    libbbcsig = windll.LoadLibrary(os.path.join(directory, "libbbcsig.dll"))
-elif platform.system() == "Darwin":
-    libbbcsig = cdll.LoadLibrary(os.path.join(directory, "libbbcsig.dylib"))
-else:
-    libbbcsig = cdll.LoadLibrary(os.path.join(directory, "libbbcsig.so"))
 
 
 def _convert_binary_to_bigint(bindat):
@@ -51,7 +40,7 @@ class KeyType:
     ECDSA_P256v1 = 2
 
 
-class KeyPair:
+class KeyPairPy:
     POINT_CONVERSION_COMPRESSED = 2     # same as enum point_conversion_form_t in openssl/crypto/ec.h
     POINT_CONVERSION_UNCOMPRESSED = 4   # same as enum point_conversion_form_t in openssl/crypto/ec.h
 
@@ -66,9 +55,9 @@ class KeyPair:
         self.public_key_len = None
         self.public_key = None
         if compression:
-            self.key_compression = KeyPair.POINT_CONVERSION_COMPRESSED
+            self.key_compression = KeyPairPy.POINT_CONVERSION_COMPRESSED
         else:
-            self.key_compression = KeyPair.POINT_CONVERSION_UNCOMPRESSED
+            self.key_compression = KeyPairPy.POINT_CONVERSION_UNCOMPRESSED
 
         if privkey is not None:
             self.mk_keyobj_from_private_key(privkey)
@@ -96,7 +85,7 @@ class KeyPair:
     def _get_naive_public_key_bytes(self):
         if self.public_key_obj is None:
             return
-        if self.key_compression == KeyPair.POINT_CONVERSION_COMPRESSED:
+        if self.key_compression == KeyPairPy.POINT_CONVERSION_COMPRESSED:
             self.public_key = self.public_key_obj.public_bytes(serialization.Encoding.X962, serialization.PublicFormat.CompressedPoint)
         else:
             self.public_key = self.public_key_obj.public_bytes(serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint)
@@ -243,5 +232,22 @@ class KeyPair:
         return True
 
 
-BACKEND_KP = KeyPair()
+BACKEND_KP = KeyPairPy()
 BACKEND_KP.generate()
+
+try:
+    directory, filename = os.path.split(os.path.realpath(__file__))
+    if platform.system() == "Windows":
+        if not os.path.exists(os.path.join(directory, "libbbcsig.dll")):
+            raise Exception("DLL not exists")
+    elif platform.system() == "Darwin":
+        if not os.path.exists(os.path.join(directory, "libbbcsig.dylib")):
+            raise Exception("DLL not exists")
+    else:
+        if not os.path.exists(os.path.join(directory, "libbbcsig.so")):
+            raise Exception("DLL not exists")
+    from bbclib.libs import bbclib_keypair_fast
+    KeyPair = bbclib_keypair_fast.KeyPairFast
+except:
+    KeyPair = KeyPairPy
+
