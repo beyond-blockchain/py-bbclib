@@ -1,0 +1,19 @@
+#!/bin/bash
+
+PYDIR=`pip show py-bbclib | grep Location | sed s'/Location: //'`
+
+if [ -z "${PYDIR}" ]; then
+  echo "XXX Please install py-bbclib in your virtualenv"
+  exit 1
+fi
+
+SRCDIR=$1
+
+if [ -f ${SRCDIR}/lib/libbbcsig.dylib ]; then
+  cp ${SRCDIR}/lib/libbbcsig.dylib ${PYDIR}/bbclib/libs/
+elif [ -f ${SRCDIR}/lib/libbbcsig.so ]; then
+  cp ${SRCDIR}/lib/libbbcsig.so ${PYDIR}/bbclib/libs/
+else
+  echo "No libbbcsig repogitory found..."
+  exit 1
+fi

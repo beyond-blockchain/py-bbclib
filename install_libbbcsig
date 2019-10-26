@@ -1,0 +1,23 @@
+#!/bin/bash
+
+PYDIR=`pip show py-bbclib | grep Location | sed s'/Location: //'`
+
+if [ -z "${PYDIR}" ]; then
+  echo "XXX Please install py-bbclib in your virtualenv"
+  exit 1
+fi
+
+TMPDIR=/tmp/tmp.libbbcsig.$$
+CDIR=${PWD}
+
+mkdir -p ${TMPDIR}
+git clone -b master https://github.com/beyond-blockchain/libbbcsig.git ${TMPDIR}
+cd ${TMPDIR}
+bash prepare.sh
+
+
+if [ -f ${TMPDIR}/lib/libbbcsig.dylib ]; then
+  cp ${TMPDIR}/lib/libbbcsig.dylib ${PYDIR}/bbclib/libs/
+elif [ -f ${TMPDIR}/lib/libbbcsig.so ]; then
+  cp ${TMPDIR}/lib/libbbcsig.so ${PYDIR}/bbclib/libs/
+fi

@@ -16,11 +16,9 @@ with open('README.rst') as f:
 class MyInstall(install):
     def run(self):
         try:
-            subprocess.call(['/bin/bash', 'prepare.sh'], cwd=here)
             subprocess.call(['python', 'prepare.py'], cwd=here)
         except Exception as e:
             print(e)
-            print("Error compiling openssl.")
             exit(1)
         else:
             install.run(self)
@@ -50,7 +48,10 @@ bbclib_requires = [
 
 bbclib_packages = ['bbclib', 'bbclib.libs', 'bbclib.compat']
 
-bbclib_commands = []
+bbclib_commands = [
+    'install_libbbcsig',
+    'copy_libbbcsig'
+]
 
 bbclib_classifiers = [
                     'Development Status :: 4 - Beta',

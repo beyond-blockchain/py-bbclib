@@ -5,7 +5,8 @@ include LICENSE.python
 include MANIFEST.in
 include package.json
 include *.rst
-include prepare.sh
+include install_libbbcsig
+include copy_libbbcsig
 include prepare.py
 graft django
 prune django/contrib/admin/bin
