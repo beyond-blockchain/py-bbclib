@@ -17,6 +17,9 @@ limitations under the License.
 import sys
 import os
 import platform
+import base64
+import hashlib
+import json
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(current_dir, "../.."))
@@ -61,6 +64,8 @@ class KeyPairPy:
             self._mk_keyobj_from_public_key(pubkey)
             self.public_key_len = len(pubkey)
             self.public_key = pubkey
+            if len(pubkey) == 33:
+                self.key_compression = KeyPair.POINT_CONVERSION_COMPRESSED
 
     def _get_naive_private_key_bytes(self):
         if self.private_key_obj is None:
@@ -94,6 +99,17 @@ class KeyPairPy:
             self.public_key_obj = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256K1(), pubkey)
         else:
             return
+
+    def get_key_id(self):
+        """calculate Base64-encoded KeyID defined in RFC7638"""
+        jwk_data = {
+            "crv": "P-256",
+            "kty": "EC",
+            "x": base64.urlsafe_b64encode(int.from_bytes(self.public_key_obj.public_numbers().x, "big")),
+            "y": base64.urlsafe_b64encode(int.from_bytes(self.public_key_obj.public_numbers().y, "big"))
+        }
+        jwk = json.dumps(jwk_data)
+        return base64.urlsafe_b64encode(hashlib.sha256(jwk.encode()).digest())
 
     def generate(self):
         """Generate a new key pair"""

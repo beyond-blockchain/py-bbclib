@@ -130,6 +130,41 @@ class BBcTransaction:
             self.cross_ref = cross_ref
         return True
 
+    def add_event(self, asset_group_id, reference_indices, mandatory_approvers=None, option_approvers=None):
+        """Add BBcEvent object in this transaction (for allowing method chain style coding)"""
+        event = BBcEvent(asset_group_id=asset_group_id, id_length=self.idlen_conf, version=self.version)
+        event.add(reference_index=reference_indices, mandatory_approver=mandatory_approvers, option_approver=option_approvers)
+        self.add(event=event)
+        return event
+
+    def add_reference(self, asset_group_id, transaction, ref_transaction=None, event_index_in_ref=0):
+        """Add BBcReference object in this transaction (for allowing method chain style coding)"""
+        ref = BBcReference(asset_group_id=asset_group_id, transaction=transaction, ref_transaction=ref_transaction,
+                           event_index_in_ref=event_index_in_ref, id_length=self.idlen_conf)
+        self.add(reference=ref)
+        return event
+
+    def add_relation(self, asset_group_id):
+        """Add BBcRelation object in this transaction (for allowing method chain style coding)"""
+        relation = BBcRelation(asset_group_id=asset_group_id, id_length=self.idlen_conf, version=self.version)
+        self.add(relation=relation)
+        return relation
+
+    def add_cross_ref(self, transaction_id, domain_id=None):
+        """Add BBcCrossRef object in this transaction (for allowing method chain style coding)"""
+        cr = BBcCrossRef(domain_id=domain_id, transaction_id=transaction_id)
+        self.add(cross_ref=cr)
+        return self
+
+    def add_signature(self, user_id, key_type, private_key=None, public_key=None, keypair=None, no_pubkey=False):
+        """Add BBcWitness and BBcSignature objects in this transaction (for allowing method chain style coding)"""
+        if self.witness is None:
+            self.witness = BBcWitness(id_length=self.idlen_conf)
+        self.witness.add_witness(user_id)
+        sig = self.sign(key_type, private_key=private_key, public_key=public_key, keypair=keypair, no_pubkey=no_pubkey)
+        self.witness.add_signature(user_id, sig)
+        return self
+
     def get_sig_index(self, user_id):
         """Reserve a space for signature for the specified user_id
 

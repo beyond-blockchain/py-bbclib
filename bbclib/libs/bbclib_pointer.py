@@ -25,7 +25,8 @@ from bbclib import id_length_conf
 
 class BBcPointer:
     """Pointer part in a transaction"""
-    def __init__(self, transaction_id=None, asset_id=None, id_length=None):
+    def __init__(self, transaction_id=None, asset_id=None, id_length=None, version=2):
+        self.version = version
         self.idlen_conf = id_length_conf.copy()
         if id_length is not None:
             if isinstance(id_length, int):

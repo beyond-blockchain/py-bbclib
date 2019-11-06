@@ -81,6 +81,29 @@ class BBcRelation:
             self.asset_hash = asset_hash
         return True
 
+    def add_asset(self, user_id, asset_body=None, asset_file=None):
+        """Add BBcAsset object in this event (for allowing method chain style coding)"""
+        self.asset = BBcAsset(user_id=user_id, asset_file=asset_file, asset_body=asset_body,
+                              id_length=self.idlen_conf, version=self.version)
+        return self
+
+    def add_asset_raw(self, asset_id, asset_body=None):
+        """Add BBcAssetRaw object in this event (for allowing method chain style coding)"""
+        self.asset_raw = BBcAssetRaw(asset_id=asset_id, asset_body=asset_body,
+                                     id_length=self.idlen_conf, version=self.version)
+        return self
+
+    def add_asset_hash(self, asset_ids):
+        """Add BBcAssetHash object in this event (for allowing method chain style coding)"""
+        self.asset_hash = BBcAssetHash(asset_ids=asset_ids, id_length=self.idlen_conf, version=self.version)
+        return self
+
+    def add_pointer(self, transaction_id=None, asset_id=None):
+        """Add BBcPointer object in this event (for allowing method chain style coding)"""
+        pointer = BBcPointer(transaction_id=transaction_id, asset_id=asset_id, id_length=self.idlen_conf, version=self.version)
+        self.pointers.append(pointer)
+        return self
+
     def pack(self):
         """Pack this object
 

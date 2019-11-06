@@ -32,7 +32,8 @@ class BBcAssetRaw:
 
     In this object, asset_id should be given externally, meaning that this object does not care about how to calculate the digest.
     """
-    def __init__(self, asset_id=None, asset_body=None, id_length=None):
+    def __init__(self, asset_id=None, asset_body=None, id_length=None, version=2):
+        self.version = version
         self.idlen_conf = id_length_conf.copy()
         if id_length is not None:
             if isinstance(id_length, int):

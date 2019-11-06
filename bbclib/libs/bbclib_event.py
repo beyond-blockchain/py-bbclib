@@ -27,7 +27,8 @@ from bbclib import id_length_conf
 
 class BBcEvent:
     """Event part in a transaction"""
-    def __init__(self, asset_group_id=None, id_length=None):
+    def __init__(self, asset_group_id=None, id_length=None, version=2):
+        self.version = version
         self.idlen_conf = id_length_conf.copy()
         if id_length is not None:
             if isinstance(id_length, int):
@@ -85,6 +86,12 @@ class BBcEvent:
         if asset is not None:
             self.asset = asset
         return True
+
+    def add_asset(self, user_id, asset_body=None, asset_file=None):
+        """Add BBcAsset object in this event (for allowing method chain style coding)"""
+        self.asset = BBcAsset(user_id=user_id, asset_file=asset_file, asset_body=asset_body,
+                              id_length=self.idlen_conf, version=self.version)
+        return self
 
     def pack(self):
         """Pack this object
