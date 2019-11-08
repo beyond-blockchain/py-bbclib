@@ -511,6 +511,6 @@ bbclib.add_reference_to_transaction(transaction2,
                                     event_index_in_ref=0)
 
 sig1 = transaction1.sign(keypair=keyPair_1)
-transaction1.reference.add_signature(user_1, sig1)
+transaction1.reference.add_signature_object(user_1, sig1)
 ```
 

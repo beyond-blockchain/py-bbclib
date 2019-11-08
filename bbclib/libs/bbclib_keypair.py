@@ -105,11 +105,11 @@ class KeyPairPy:
         jwk_data = {
             "crv": "P-256",
             "kty": "EC",
-            "x": base64.urlsafe_b64encode(int.from_bytes(self.public_key_obj.public_numbers().x, "big")),
-            "y": base64.urlsafe_b64encode(int.from_bytes(self.public_key_obj.public_numbers().y, "big"))
+            "x": base64.urlsafe_b64encode(self.public_key_obj.public_numbers().x.to_bytes(32, "big")).decode().replace("=", ""),
+            "y": base64.urlsafe_b64encode(self.public_key_obj.public_numbers().y.to_bytes(32, "big")).decode().replace("=", "")
         }
-        jwk = json.dumps(jwk_data)
-        return base64.urlsafe_b64encode(hashlib.sha256(jwk.encode()).digest())
+        jwk = json.dumps(jwk_data, separators=(',', ':'))
+        return hashlib.sha256(jwk.encode()).digest()
 
     def generate(self):
         """Generate a new key pair"""

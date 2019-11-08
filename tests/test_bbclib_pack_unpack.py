@@ -36,8 +36,8 @@ class TestBBcLibPackUnpack(object):
         print(unpacked_txobj)
         for u in users:
             sig = unpacked_txobj.sign(keypair=u[1])
-            unpacked_txobj.add_signature(user_id=u[0], signature=sig)
-            transaction1.add_signature(user_id=u[0], signature=sig)
+            unpacked_txobj.add_signature_object(user_id=u[0], signature=sig)
+            transaction1.add_signature_object(user_id=u[0], signature=sig)
 
         original_packed_tx = transaction1.pack()
         recovered_packed_tx = unpacked_txobj.pack()
@@ -54,7 +54,7 @@ class TestBBcLibPackUnpack(object):
         bbclib.add_event_asset(transaction1, event_idx=0, asset_group_id=asset_group_id, user_id=users[0][0], asset_body=b"data1")
         transaction1.witness.add_witness(user_id=users[0][0])
         sig = transaction1.sign(keypair=users[0][1])
-        transaction1.add_signature(user_id=users[0][0], signature=sig)
+        transaction1.add_signature_object(user_id=users[0][0], signature=sig)
         transaction1.digest()
         print(transaction1)
 
@@ -74,8 +74,8 @@ class TestBBcLibPackUnpack(object):
 
         for i in range(len(users)-2, -1, -1):
             sig = unpacked_txobj.sign(keypair=users[i][1])
-            unpacked_txobj.add_signature(user_id=users[i][0], signature=sig)
-            transaction2.add_signature(user_id=users[i][0], signature=sig)
+            unpacked_txobj.add_signature_object(user_id=users[i][0], signature=sig)
+            transaction2.add_signature_object(user_id=users[i][0], signature=sig)
 
         print(unpacked_txobj)
         original_packed_tx = transaction2.pack()

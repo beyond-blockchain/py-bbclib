@@ -96,11 +96,12 @@ class BBcReference:
         """
         if user_id in self.option_approvers:
             if len(self.option_sig_ids) == 0:
-                return
+                return False
             user_id = self.option_sig_ids.pop(0)
         elif user_id not in self.mandatory_approvers:
-            return
-        self.transaction.add_signature(user_id=user_id, signature=signature)
+            return False
+        self.transaction.add_signature_object(user_id=user_id, signature=signature)
+        return True
 
     def get_destinations(self):
         """Return the list of approvers in the referred transaction"""

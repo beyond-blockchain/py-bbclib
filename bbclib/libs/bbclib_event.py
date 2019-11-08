@@ -74,7 +74,10 @@ class BBcEvent:
         if asset_group_id is not None:
             self.asset_group_id = asset_group_id[:self.idlen_conf["asset_group_id"]]
         if reference_index is not None:
-            self.reference_indices.append(reference_index)
+            if isinstance(reference_index, list):
+                self.reference_indices.extend(reference_index)
+            else:
+                self.reference_indices.append(reference_index)
         if mandatory_approver is not None:
             self.mandatory_approvers.append(mandatory_approver[:self.idlen_conf["user_id"]])
         if option_approver_num_numerator > 0:
@@ -92,6 +95,21 @@ class BBcEvent:
         self.asset = BBcAsset(user_id=user_id, asset_file=asset_file, asset_body=asset_body,
                               id_length=self.idlen_conf, version=self.version)
         return self
+
+    def add_mandatory_approver(self, approver):
+        """Add mandatory approver"""
+        self.mandatory_approvers.append(approver[:self.idlen_conf["user_id"]])
+
+    def add_option_approver(self, approver):
+        """Add optional approver"""
+        self.option_approvers.append(approver[:self.idlen_conf["user_id"]])
+
+    def add_option_parameter(self, numerator, denominator):
+        """Set option parameters"""
+        if numerator > 0:
+            self.option_approver_num_numerator = numerator
+        if denominator > 0:
+            self.option_approver_num_denominator = denominator
 
     def pack(self):
         """Pack this object

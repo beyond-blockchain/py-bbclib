@@ -1,3 +1,8 @@
+from authlib.jose import JsonWebKey
+from authlib.jose import JWK_ALGORITHMS
+import hashlib
+import json
+
 import sys
 sys.path.append('.')
 sys.path.append('..')
@@ -56,3 +61,18 @@ class TestKey(object):
         pem2 = keypair2.get_private_key_in_pem()
         pem2 = pem2.decode().rstrip()
         assert pem1 == pem2
+
+    def test_03_keyid(self):
+        print("\n-----", sys._getframe().f_code.co_name, "-----")
+        pem1 = "-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIDSt1IOhS5ZmY6nkX/Wh7pT+Y45TmYxrwoc1pG72v387oAoGCCqGSM49\nAwEHoUQDQgAEdEsjD2i2LytHOjNxxc9PbFeqQ89aMLOfmdBbEoSOhZBukJ52EqQM\nhOdgHqyqD4hEyYxgDu3uIbKat+lEZEhb3Q==\n-----END EC PRIVATE KEY-----"
+        keypair1 = bbclib.KeyPair()
+        keypair1.mk_keyobj_from_private_key_pem(pem1)
+        keyid1 = keypair1.get_key_id()
+
+        pubkey = keypair1.get_public_key_in_pem()
+        jwk = JsonWebKey(algorithms=JWK_ALGORITHMS)
+        obj = jwk.dumps(pubkey, kty='EC')
+        json_obj = json.dumps(obj, separators=(',', ':'), sort_keys=True)
+        keyid2 = hashlib.sha256(json_obj.encode()).digest()
+        assert keyid1 == keyid2
+

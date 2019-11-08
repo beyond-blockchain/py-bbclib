@@ -26,8 +26,9 @@ from bbclib.libs import bbclib_utils
 
 class BBcWitness:
     """Witness part in a transaction"""
-    def __init__(self, id_length=None):
+    def __init__(self, id_length=None, version=2):
         self.idlen_conf = id_length_conf.copy()
+        self.version = version
         if id_length is not None:
             if isinstance(id_length, int):
                 for k in self.idlen_conf.keys():
@@ -63,7 +64,7 @@ class BBcWitness:
             user_id (bytes): user_id of the signature owner
             signature (BBcSignature): signature
         """
-        self.transaction.add_signature(user_id=user_id[:self.idlen_conf["user_id"]], signature=signature)
+        self.transaction.add_signature_object(user_id=user_id[:self.idlen_conf["user_id"]], signature=signature)
 
     def pack(self):
         """Pack this object

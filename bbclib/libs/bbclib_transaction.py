@@ -130,21 +130,21 @@ class BBcTransaction:
             self.cross_ref = cross_ref
         return True
 
-    def add_event(self, asset_group_id, reference_indices, mandatory_approvers=None, option_approvers=None):
+    def create_event(self, asset_group_id, reference_indices=None, mandatory_approvers=None, option_approvers=None):
         """Add BBcEvent object in this transaction (for allowing method chain style coding)"""
         event = BBcEvent(asset_group_id=asset_group_id, id_length=self.idlen_conf, version=self.version)
         event.add(reference_index=reference_indices, mandatory_approver=mandatory_approvers, option_approver=option_approvers)
         self.add(event=event)
         return event
 
-    def add_reference(self, asset_group_id, transaction, ref_transaction=None, event_index_in_ref=0):
+    def add_reference(self, asset_group_id, ref_transaction=None, event_index_in_ref=0):
         """Add BBcReference object in this transaction (for allowing method chain style coding)"""
-        ref = BBcReference(asset_group_id=asset_group_id, transaction=transaction, ref_transaction=ref_transaction,
+        ref = BBcReference(asset_group_id=asset_group_id, transaction=self, ref_transaction=ref_transaction,
                            event_index_in_ref=event_index_in_ref, id_length=self.idlen_conf)
         self.add(reference=ref)
-        return event
+        return self
 
-    def add_relation(self, asset_group_id):
+    def create_relation(self, asset_group_id):
         """Add BBcRelation object in this transaction (for allowing method chain style coding)"""
         relation = BBcRelation(asset_group_id=asset_group_id, id_length=self.idlen_conf, version=self.version)
         self.add(relation=relation)
@@ -156,13 +156,23 @@ class BBcTransaction:
         self.add(cross_ref=cr)
         return self
 
-    def add_signature(self, user_id, key_type, private_key=None, public_key=None, keypair=None, no_pubkey=False):
-        """Add BBcWitness and BBcSignature objects in this transaction (for allowing method chain style coding)"""
+    def add_witness(self, user_id):
+        """Add BBcWitness object in this transaction"""
         if self.witness is None:
-            self.witness = BBcWitness(id_length=self.idlen_conf)
+            self.witness = BBcWitness(id_length=self.idlen_conf, version=self.version)
+            self.witness.transaction = self
         self.witness.add_witness(user_id)
-        sig = self.sign(key_type, private_key=private_key, public_key=public_key, keypair=keypair, no_pubkey=no_pubkey)
-        self.witness.add_signature(user_id, sig)
+        return self
+
+    def add_signature(self, user_id, key_type=None, private_key=None, public_key=None, keypair=None, no_pubkey=False):
+        """Add BBcWitness and BBcSignature objects in this transaction (for allowing method chain style coding)"""
+        user_id = user_id[:self.idlen_conf["user_id"]]
+        sig = self.sign(key_type=key_type, private_key=private_key, public_key=public_key, keypair=keypair, no_pubkey=no_pubkey)
+        if not self.add_signature_object(user_id=user_id, signature=sig):
+            if self.references is not None:
+                for ref in self.references:
+                    if ref.add_signature(user_id=user_id, signature=sig):
+                        return self
         return self
 
     def get_sig_index(self, user_id):
@@ -189,7 +199,7 @@ class BBcTransaction:
             return
         self.userid_sigidx_mapping[user_id] = idx
 
-    def add_signature(self, user_id=None, signature=None):
+    def add_signature_object(self, user_id=None, signature=None):
         """Add signature in the reserved space
 
         Args:

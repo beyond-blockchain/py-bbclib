@@ -1470,7 +1470,7 @@ class BBcReference:
                 return
             user_id = self.option_sig_ids.pop(0)
         signature.format_type = self.transaction.format_type
-        self.transaction.add_signature(user_id=user_id, signature=signature)
+        self.transaction.add_signature_object(user_id=user_id, signature=signature)
 
     def get_referred_transaction(self):
         """Return referred transaction in serialized format"""
@@ -1810,7 +1810,7 @@ class BBcWitness:
             signature (bytes): signature
         """
         signature.format_type = self.transaction.format_type
-        self.transaction.add_signature(user_id=user_id[:self.id_length], signature=signature)
+        self.transaction.add_signature_object(user_id=user_id[:self.id_length], signature=signature)
 
     def serialize(self):
         """Serialize this object
