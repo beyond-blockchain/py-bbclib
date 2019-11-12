@@ -280,10 +280,10 @@ relation_obj = bbclib.make_relation_with_asset_raw(
 
 ## BBcRelationオブジェクトの中にポインタを追加する
 
-ユーティリティ関数：bbclib.add_pointer_in_relation
+ユーティリティ関数：bbclib.create_pointer_in_relation
 
 ```python
-def add_pointer_in_relation(relation, ref_transaction_id=None, ref_asset_id=None):
+def create_pointer_in_relation(relation, ref_transaction_id=None, ref_asset_id=None):
 ```
 
 #### 説明

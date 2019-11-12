@@ -24,8 +24,7 @@ import traceback
 current_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(current_dir, "../.."))
 
-from bbclib.libs import bbclib_utils
-import bbclib
+from bbclib.libs import bbclib_binary
 from bbclib import id_length_conf
 
 
@@ -46,7 +45,7 @@ class BBcAsset:
             self.user_id = user_id[:self.idlen_conf["user_id"]]
         else:
             self.user_id = None
-        self.nonce = bbclib_utils.get_random_value(self.idlen_conf["nonce"])
+        self.nonce = bbclib_binary.get_random_value(self.idlen_conf["nonce"])
         self.asset_file_size = 0
         self.asset_file = None
         self.asset_file_digest = None
@@ -57,11 +56,11 @@ class BBcAsset:
 
     def __str__(self):
         ret =  "  Asset:\n"
-        ret += "     asset_id: %s\n" % bbclib_utils.str_binary(self.asset_id)
-        ret += "     user_id: %s\n" % bbclib_utils.str_binary(self.user_id)
-        ret += "     nonce: %s\n" % bbclib_utils.str_binary(self.nonce)
+        ret += "     asset_id: %s\n" % bbclib_binary.str_binary(self.asset_id)
+        ret += "     user_id: %s\n" % bbclib_binary.str_binary(self.user_id)
+        ret += "     nonce: %s\n" % bbclib_binary.str_binary(self.nonce)
         ret += "     file_size: %d\n" % self.asset_file_size
-        ret += "     file_digest: %s\n" % bbclib_utils.str_binary(self.asset_file_digest)
+        ret += "     file_digest: %s\n" % bbclib_binary.str_binary(self.asset_file_digest)
         ret += "     body_size: %d\n" % self.asset_body_size
         ret += "     body: %s\n" % self.asset_body
         return ret
@@ -122,21 +121,21 @@ class BBcAsset:
         """
         dat = bytearray()
         if not for_digest_calculation:
-            dat.extend(bbclib_utils.to_bigint(self.asset_id, size=self.idlen_conf["asset_id"]))
-        dat.extend(bbclib_utils.to_bigint(self.user_id, size=self.idlen_conf["user_id"]))
-        dat.extend(bbclib_utils.to_2byte(len(self.nonce)))
+            dat.extend(bbclib_binary.to_bigint(self.asset_id, size=self.idlen_conf["asset_id"]))
+        dat.extend(bbclib_binary.to_bigint(self.user_id, size=self.idlen_conf["user_id"]))
+        dat.extend(bbclib_binary.to_2byte(len(self.nonce)))
         dat.extend(self.nonce)
-        dat.extend(bbclib_utils.to_4byte(self.asset_file_size))
+        dat.extend(bbclib_binary.to_4byte(self.asset_file_size))
         if self.asset_file_size > 0:
-            dat.extend(bbclib_utils.to_bigint(self.asset_file_digest))
+            dat.extend(bbclib_binary.to_bigint(self.asset_file_digest))
         if isinstance(self.asset_body, dict):
-            dat.extend(bbclib_utils.to_2byte(1))
+            dat.extend(bbclib_binary.to_2byte(1))
             astbdy = msgpack.dumps(self.asset_body)
-            dat.extend(bbclib_utils.to_2byte(len(astbdy)))
+            dat.extend(bbclib_binary.to_2byte(len(astbdy)))
             dat.extend(astbdy)
         else:
-            dat.extend(bbclib_utils.to_2byte(0))
-            dat.extend(bbclib_utils.to_2byte(self.asset_body_size))
+            dat.extend(bbclib_binary.to_2byte(0))
+            dat.extend(bbclib_binary.to_2byte(self.asset_body_size))
             if self.asset_body_size > 0:
                 dat.extend(self.asset_body)
         return bytes(dat)
@@ -151,26 +150,26 @@ class BBcAsset:
         """
         ptr = 0
         try:
-            ptr, self.asset_id = bbclib_utils.get_bigint(ptr, data)
+            ptr, self.asset_id = bbclib_binary.get_bigint(ptr, data)
             self.idlen_conf["asset_id"] = len(self.asset_id)
-            ptr, self.user_id = bbclib_utils.get_bigint(ptr, data)
+            ptr, self.user_id = bbclib_binary.get_bigint(ptr, data)
             self.idlen_conf["user_id"] = len(self.user_id)
-            ptr, noncelen = bbclib_utils.get_n_byte_int(ptr, 2, data)
+            ptr, noncelen = bbclib_binary.get_n_byte_int(ptr, 2, data)
             self.idlen_conf["nonce"] = noncelen
-            ptr, self.nonce = bbclib_utils.get_n_bytes(ptr, noncelen, data)
-            ptr, self.asset_file_size = bbclib_utils.get_n_byte_int(ptr, 4, data)
+            ptr, self.nonce = bbclib_binary.get_n_bytes(ptr, noncelen, data)
+            ptr, self.asset_file_size = bbclib_binary.get_n_byte_int(ptr, 4, data)
             if self.asset_file_size > 0:
-                ptr, self.asset_file_digest = bbclib_utils.get_bigint(ptr, data)
+                ptr, self.asset_file_digest = bbclib_binary.get_bigint(ptr, data)
             else:
                 self.asset_file_digest = None
-            ptr, dict_flag = bbclib_utils.get_n_byte_int(ptr, 2, data)
+            ptr, dict_flag = bbclib_binary.get_n_byte_int(ptr, 2, data)
             if dict_flag != 1:
-                ptr, self.asset_body_size = bbclib_utils.get_n_byte_int(ptr, 2, data)
+                ptr, self.asset_body_size = bbclib_binary.get_n_byte_int(ptr, 2, data)
                 if self.asset_body_size > 0:
-                    ptr, self.asset_body = bbclib_utils.get_n_bytes(ptr, self.asset_body_size, data)
+                    ptr, self.asset_body = bbclib_binary.get_n_bytes(ptr, self.asset_body_size, data)
             else:
-                ptr, sz = bbclib_utils.get_n_byte_int(ptr, 2, data)
-                ptr, astbdy = bbclib_utils.get_n_bytes(ptr, sz, data)
+                ptr, sz = bbclib_binary.get_n_byte_int(ptr, 2, data)
+                ptr, astbdy = bbclib_binary.get_n_bytes(ptr, sz, data)
                 self.asset_body = msgpack.loads(astbdy)
                 self.asset_body_size = len(self.asset_body)
 

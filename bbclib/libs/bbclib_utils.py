@@ -39,6 +39,7 @@ from bbclib.libs.bbclib_event import BBcEvent
 from bbclib.libs.bbclib_pointer import BBcPointer
 from bbclib.libs.bbclib_witness import BBcWitness
 from bbclib.libs.bbclib_crossref import BBcCrossRef
+from bbclib.libs import bbclib_binary
 
 
 def str_binary(dat):
@@ -73,20 +74,6 @@ def get_random_id():
     source_str = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     output = "".join([random.choice(source_str) for x in range(16)])
     return hashlib.sha256(bytes(output.encode())).digest()
-
-
-def get_random_value(length=DEFAULT_ID_LEN):
-    """Return random bytes
-
-    Args:
-        length (int): length of the result
-    Returns:
-        bytes: random bytes
-    """
-    val = bytearray()
-    for i in range(length):
-        val.append(random.randint(0,255))
-    return bytes(val)
 
 
 def convert_id_to_string(data, bytelen=DEFAULT_ID_LEN):
@@ -139,7 +126,7 @@ def deep_copy_with_key_stringify(u, d=None):
     return d
 
 
-def make_transaction(event_num=0, relation_num=0, witness=False, version=1):
+def make_transaction(event_num=0, relation_num=0, witness=False, version=2):
     """Utility to make transaction object
 
     Args:
@@ -322,51 +309,6 @@ def recover_signature_object(data):
     return sig
 
 
-def to_bigint(val, size=32):
-    dat = bytearray(to_2byte(size))
-    dat.extend(val)
-    return dat
-
-
-def to_8byte(val):
-    return val.to_bytes(8, 'little')
-
-
-def to_4byte(val):
-    return val.to_bytes(4, 'little')
-
-
-def to_2byte(val):
-    return val.to_bytes(2, 'little')
-
-
-def to_1byte(val):
-    return val.to_bytes(1, 'little')
-
-
-def get_n_bytes(ptr, n, dat):
-    return ptr+n, dat[ptr:ptr+n]
-
-
-def get_n_byte_int(ptr, n, dat):
-    return ptr+n, int.from_bytes(dat[ptr:ptr+n], 'little')
-
-
-def get_bigint(ptr, dat):
-    size = int.from_bytes(dat[ptr:ptr+2], 'little')
-    return ptr+2+size, dat[ptr+2:ptr+2+size]
-
-
-def bin2str_base64(dat):
-    import binascii
-    return binascii.b2a_base64(dat, newline=False).decode("utf-8")
-
-
-def bin2str_base64(dat):
-    import binascii
-    return binascii.b2a_base64(dat, newline=False).decode("utf-8")
-
-
 def validate_transaction_object(txobj, asset_files=None):
     """Validate transaction and its asset
 
@@ -437,8 +379,8 @@ def verify_using_cross_ref(domain_id, transaction_id, transaction_base_digest, c
     if cross.domain_id != domain_id or cross.transaction_id != transaction_id:
         return False
     dat = bytearray(transaction_base_digest)
-    dat.extend(to_2byte(1))
-    dat.extend(to_4byte(len(cross_ref_data)))
+    dat.extend(bbclib_binary.to_2byte(1))
+    dat.extend(bbclib_binary.to_4byte(len(cross_ref_data)))
     dat.extend(cross.pack())
     digest = hashlib.sha256(bytes(dat)).digest()
     sig = BBcSignature(unpack=sigdata)

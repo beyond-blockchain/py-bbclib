@@ -20,7 +20,7 @@ import traceback
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(current_dir, "../.."))
-from bbclib.libs import bbclib_utils
+from bbclib.libs import bbclib_binary
 from bbclib.libs.bbclib_pointer import BBcPointer
 from bbclib.libs.bbclib_asset import BBcAsset
 from bbclib.libs.bbclib_asset_raw import BBcAssetRaw
@@ -50,7 +50,7 @@ class BBcRelation:
         self.asset_hash = None
 
     def __str__(self):
-        ret =  "  asset_group_id: %s\n" % bbclib_utils.str_binary(self.asset_group_id)
+        ret =  "  asset_group_id: %s\n" % bbclib_binary.str_binary(self.asset_group_id)
         if len(self.pointers) > 0:
             ret += "  Pointers[]: %d\n" % len(self.pointers)
             for i, pt in enumerate(self.pointers):
@@ -81,25 +81,65 @@ class BBcRelation:
             self.asset_hash = asset_hash
         return True
 
-    def add_asset(self, user_id, asset_body=None, asset_file=None):
-        """Add BBcAsset object in this event (for allowing method chain style coding)"""
+    def set_asset_group(self, asset_group_id):
+        """Set asset_group_id in the BBcRelation object
+
+        Args:
+            asset_group_id (byte): asset_group_id
+        Returns:
+            BBcRelation: this object
+        """
+        if asset_group_id is not None:
+            self.asset_group_id = asset_group_id[:self.idlen_conf["asset_group_id"]]
+        return self
+
+    def create_asset(self, user_id, asset_body=None, asset_file=None):
+        """Create BBcAsset object and set it to self.asset in the BBcRelation object
+
+        Args:
+            user_id (byte): user_id to set in BBcAsset object
+            asset_body (*): asset_body to set in BBcAsset object
+            asset_file (byte): asset file to set in BBcAsset object
+        Returns:
+            BBcRelation: this object
+        """
         self.asset = BBcAsset(user_id=user_id, asset_file=asset_file, asset_body=asset_body,
                               id_length=self.idlen_conf, version=self.version)
         return self
 
-    def add_asset_raw(self, asset_id, asset_body=None):
-        """Add BBcAssetRaw object in this event (for allowing method chain style coding)"""
+    def create_asset_raw(self, asset_id, asset_body=None):
+        """Create BBcAssetRaw object and set it to self.asset in the BBcRelation object
+
+        Args:
+            asset_id (byte): asset_id to set in BBcAssetRaw object
+            asset_body (*): asset_body to set in BBcAssetRaw object
+        Returns:
+            BBcRelation: this object
+        """
         self.asset_raw = BBcAssetRaw(asset_id=asset_id, asset_body=asset_body,
                                      id_length=self.idlen_conf, version=self.version)
         return self
 
-    def add_asset_hash(self, asset_ids):
-        """Add BBcAssetHash object in this event (for allowing method chain style coding)"""
+    def create_asset_hash(self, asset_ids):
+        """Create BBcAssetHash object and set it to self.asset in the BBcRelation object
+
+        Args:
+            asset_ids (list(byte)): list of asset_ids to set in BBcAssetRaw object
+        Returns:
+            BBcRelation: this object
+        """
         self.asset_hash = BBcAssetHash(asset_ids=asset_ids, id_length=self.idlen_conf, version=self.version)
         return self
 
-    def add_pointer(self, transaction_id=None, asset_id=None):
-        """Add BBcPointer object in this event (for allowing method chain style coding)"""
+    def create_pointer(self, transaction_id=None, asset_id=None):
+        """Create BBcPointer object and set it to self.asset in the BBcRelation object
+
+        Args:
+            transaction_id (byte): transaction_id
+            asset_id (byte): asset_id
+        Returns:
+            BBcRelation: this object
+        """
         pointer = BBcPointer(transaction_id=transaction_id, asset_id=asset_id, id_length=self.idlen_conf, version=self.version)
         self.pointers.append(pointer)
         return self
@@ -112,31 +152,31 @@ class BBcRelation:
         """
         if self.asset_group_id is None:
             raise Exception("need asset_group_id in BBcRelation")
-        dat = bytearray(bbclib_utils.to_bigint(self.asset_group_id, size=self.idlen_conf["asset_group_id"]))
-        dat.extend(bbclib_utils.to_2byte(len(self.pointers)))
+        dat = bytearray(bbclib_binary.to_bigint(self.asset_group_id, size=self.idlen_conf["asset_group_id"]))
+        dat.extend(bbclib_binary.to_2byte(len(self.pointers)))
         for i in range(len(self.pointers)):
             pt = self.pointers[i].pack()
-            dat.extend(bbclib_utils.to_2byte(len(pt)))
+            dat.extend(bbclib_binary.to_2byte(len(pt)))
             dat.extend(pt)
         if self.asset is not None:
             ast = self.asset.pack()
-            dat.extend(bbclib_utils.to_4byte(len(ast)))
+            dat.extend(bbclib_binary.to_4byte(len(ast)))
             dat.extend(ast)
         else:
-            dat.extend(bbclib_utils.to_4byte(0))
+            dat.extend(bbclib_binary.to_4byte(0))
         if self.version >= 2:
             if self.asset_raw is not None:
                 ast = self.asset_raw.pack()
-                dat.extend(bbclib_utils.to_4byte(len(ast)))
+                dat.extend(bbclib_binary.to_4byte(len(ast)))
                 dat.extend(ast)
             else:
-                dat.extend(bbclib_utils.to_4byte(0))
+                dat.extend(bbclib_binary.to_4byte(0))
             if self.asset_hash is not None:
                 ast = self.asset_hash.pack()
-                dat.extend(bbclib_utils.to_4byte(len(ast)))
+                dat.extend(bbclib_binary.to_4byte(len(ast)))
                 dat.extend(ast)
             else:
-                dat.extend(bbclib_utils.to_4byte(0))
+                dat.extend(bbclib_binary.to_4byte(0))
         return bytes(dat)
 
     def unpack(self, data, version=2):
@@ -152,13 +192,13 @@ class BBcRelation:
         self.version = version
         data_size = len(data)
         try:
-            ptr, self.asset_group_id = bbclib_utils.get_bigint(ptr, data)
+            ptr, self.asset_group_id = bbclib_binary.get_bigint(ptr, data)
             self.idlen_conf["asset_group_id"]= len(self.asset_group_id)
-            ptr, pt_num = bbclib_utils.get_n_byte_int(ptr, 2, data)
+            ptr, pt_num = bbclib_binary.get_n_byte_int(ptr, 2, data)
             self.pointers = list()
             for i in range(pt_num):
-                ptr, size = bbclib_utils.get_n_byte_int(ptr, 2, data)
-                ptr, ptdata = bbclib_utils.get_n_bytes(ptr, size, data)
+                ptr, size = bbclib_binary.get_n_byte_int(ptr, 2, data)
+                ptr, ptdata = bbclib_binary.get_n_bytes(ptr, size, data)
                 if ptr >= data_size:
                     return False
                 pt = BBcPointer()
@@ -166,26 +206,26 @@ class BBcRelation:
                     return False
                 self.pointers.append(pt)
             self.asset = None
-            ptr, astsize = bbclib_utils.get_n_byte_int(ptr, 4, data)
+            ptr, astsize = bbclib_binary.get_n_byte_int(ptr, 4, data)
             if astsize > 0:
                 self.asset = BBcAsset()
-                ptr, astdata = bbclib_utils.get_n_bytes(ptr, astsize, data)
+                ptr, astdata = bbclib_binary.get_n_bytes(ptr, astsize, data)
                 if not self.asset.unpack(astdata):
                     return False
 
             if version >= 2:
                 self.asset_raw = None
-                ptr, astsize = bbclib_utils.get_n_byte_int(ptr, 4, data)
+                ptr, astsize = bbclib_binary.get_n_byte_int(ptr, 4, data)
                 if astsize > 0:
                     self.asset_raw = BBcAssetRaw()
-                    ptr, astdata = bbclib_utils.get_n_bytes(ptr, astsize, data)
+                    ptr, astdata = bbclib_binary.get_n_bytes(ptr, astsize, data)
                     if not self.asset_raw.unpack(astdata):
                         return False
                 self.asset_hash = None
-                ptr, astsize = bbclib_utils.get_n_byte_int(ptr, 4, data)
+                ptr, astsize = bbclib_binary.get_n_byte_int(ptr, 4, data)
                 if astsize > 0:
                     self.asset_hash = BBcAssetHash()
-                    ptr, astdata = bbclib_utils.get_n_bytes(ptr, astsize, data)
+                    ptr, astdata = bbclib_binary.get_n_bytes(ptr, astsize, data)
                     if not self.asset_hash.unpack(astdata):
                         return False
 

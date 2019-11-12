@@ -38,36 +38,37 @@ def make_transactions(id_len_conf=None, idlen=None, no_pubkey=False):
     elif idlen is not None:
         bbclib.configure_id_length_all(idlen)
 
-    transactions.append(BBcTransaction(version=2))
-    transactions[0].create_relation(asset_group_id1).add_asset(user_id=user_id1, asset_body=b'relation:asset_0-0')
-    transactions[0].create_event(asset_group_id1).add_asset(user_id=user_id1, asset_body=b'event:asset_0-0').add_mandatory_approver(user_id1)
+    txobj = bbclib.make_transaction(event_num=1, relation_num=1, witness=True)
+    transactions.append(txobj)
+    txobj.relations[0].set_asset_group(asset_group_id1).create_asset(user_id=user_id1, asset_body=b'relation:asset_0-0')
+    txobj.events[0].set_asset_group(asset_group_id1).create_asset(user_id=user_id1, asset_body=b'event:asset_0-0').add_mandatory_approver(user_id1)
     transactions[0].add_witness(user_id1)
     transactions[0].add_signature(user_id=user_id1, keypair=keypair1)
 
     for i in range(1, 20):
         k = i - 1
-        txobj = BBcTransaction(version=2)
-        txobj.create_relation(asset_group_id1)\
-            .add_asset(user_id=user_id1, asset_body=b'relation:asset_1-%d' % i) \
-            .add_pointer(transaction_id=transactions[k].transaction_id, asset_id=transactions[k].relations[0].asset.asset_id)
-        txobj.create_relation(asset_group_id2) \
-            .add_asset(user_id=user_id2, asset_body=b'relation:asset_2-%d' % i) \
-            .add_pointer(transaction_id=transactions[k].transaction_id, asset_id=transactions[k].relations[0].asset.asset_id) \
-            .add_pointer(transaction_id=transactions[0].transaction_id, asset_id=transactions[0].relations[0].asset.asset_id)
-        txobj.create_event(asset_group_id1)\
-            .add_asset(user_id=user_id2, asset_body=b'event:asset_3-%d' % i).add_mandatory_approver(user_id1)
+        txobj = bbclib.make_transaction(event_num=1, relation_num=4, witness=True)
+        txobj.relations[0].set_asset_group(asset_group_id1)\
+            .create_asset(user_id=user_id1, asset_body=b'relation:asset_1-%d' % i) \
+            .create_pointer(transaction_id=transactions[k].transaction_id, asset_id=transactions[k].relations[0].asset.asset_id)
+        txobj.relations[1].set_asset_group(asset_group_id2) \
+            .create_asset(user_id=user_id2, asset_body=b'relation:asset_2-%d' % i) \
+            .create_pointer(transaction_id=transactions[k].transaction_id, asset_id=transactions[k].relations[0].asset.asset_id) \
+            .create_pointer(transaction_id=transactions[0].transaction_id, asset_id=transactions[0].relations[0].asset.asset_id)
+        txobj.events[0].set_asset_group(asset_group_id1)\
+            .create_asset(user_id=user_id2, asset_body=b'event:asset_3-%d' % i).add_mandatory_approver(user_id1)
 
         ash = [bbclib.get_new_id("assethash%d" % i)[:bbclib.id_length_conf["asset_id"]] for i in range(5)]
-        txobj.create_relation(asset_group_id1)\
-            .add_asset_raw(asset_id=ash[0], asset_body=b'relation:asset_4-%d' % i) \
-            .add_pointer(transaction_id=transactions[0].transaction_id, asset_id=transactions[0].relations[0].asset.asset_id) \
-            .add_pointer(transaction_id=transactions[0].transaction_id, asset_id=None)
-        txobj.create_relation(asset_group_id2)\
-            .add_asset_hash(asset_ids=ash[1:])\
-            .add_pointer(transaction_id=transactions[0].transaction_id, asset_id=transactions[0].relations[0].asset.asset_id)
+        txobj.relations[2].set_asset_group(asset_group_id1)\
+            .create_asset_raw(asset_id=ash[0], asset_body=b'relation:asset_4-%d' % i) \
+            .create_pointer(transaction_id=transactions[0].transaction_id, asset_id=transactions[0].relations[0].asset.asset_id) \
+            .create_pointer(transaction_id=transactions[0].transaction_id, asset_id=None)
+        txobj.relations[3].set_asset_group(asset_group_id2)\
+            .create_asset_hash(asset_ids=ash[1:])\
+            .create_pointer(transaction_id=transactions[0].transaction_id, asset_id=transactions[0].relations[0].asset.asset_id)
 
-        txobj.add_reference(asset_group_id1, ref_transaction=transactions[i-1], event_index_in_ref=0)
-        txobj.add_cross_ref(transactions[0].transaction_id, domain_id=domain_id)
+        txobj.create_reference(asset_group_id1, ref_transaction=transactions[i-1], event_index_in_ref=0)
+        txobj.create_cross_ref(transactions[0].transaction_id, domain_id=domain_id)
 
         txobj.add_witness(user_id1)
         txobj.add_witness(user_id2)

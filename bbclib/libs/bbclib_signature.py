@@ -24,7 +24,7 @@ sys.path.append(os.path.join(current_dir, "../.."))
 
 import bbclib
 from bbclib.libs.bbclib_config import DEFAULT_CURVETYPE
-from bbclib.libs import bbclib_utils, bbclib_error
+from bbclib.libs import bbclib_binary, bbclib_error
 from bbclib.libs.bbclib_keypair import KeyPair, KeyType
 
 
@@ -64,17 +64,17 @@ class BBcSignature:
     def pack(self):
         """Pack this object"""
         if self.not_initialized:
-            dat = bytearray(bbclib_utils.to_4byte(KeyType.NOT_INITIALIZED))
+            dat = bytearray(bbclib_binary.to_4byte(KeyType.NOT_INITIALIZED))
             return bytes(dat)
-        dat = bytearray(bbclib_utils.to_4byte(self.key_type))
+        dat = bytearray(bbclib_binary.to_4byte(self.key_type))
         if self.pubkey is None:
-            dat.extend(bbclib_utils.to_4byte(0))
+            dat.extend(bbclib_binary.to_4byte(0))
         else:
             pubkey_len_bit = len(self.pubkey) * 8
-            dat.extend(bbclib_utils.to_4byte(pubkey_len_bit))
+            dat.extend(bbclib_binary.to_4byte(pubkey_len_bit))
             dat.extend(self.pubkey)
         sig_len_bit = len(self.signature) * 8
-        dat.extend(bbclib_utils.to_4byte(sig_len_bit))
+        dat.extend(bbclib_binary.to_4byte(sig_len_bit))
         dat.extend(self.signature)
         return bytes(dat)
 
@@ -88,18 +88,18 @@ class BBcSignature:
         """
         ptr = 0
         try:
-            ptr, self.key_type = bbclib_utils.get_n_byte_int(ptr, 4, data)
+            ptr, self.key_type = bbclib_binary.get_n_byte_int(ptr, 4, data)
             if self.key_type == KeyType.NOT_INITIALIZED:
                 return True
-            ptr, pubkey_len_bit = bbclib_utils.get_n_byte_int(ptr, 4, data)
+            ptr, pubkey_len_bit = bbclib_binary.get_n_byte_int(ptr, 4, data)
             if pubkey_len_bit > 0:
                 pubkey_len = int(pubkey_len_bit/8)
-                ptr, pubkey = bbclib_utils.get_n_bytes(ptr, pubkey_len, data)
+                ptr, pubkey = bbclib_binary.get_n_bytes(ptr, pubkey_len, data)
             else:
                 pubkey = None
-            ptr, sig_len_bit = bbclib_utils.get_n_byte_int(ptr, 4, data)
+            ptr, sig_len_bit = bbclib_binary.get_n_byte_int(ptr, 4, data)
             sig_len = int(sig_len_bit/8)
-            ptr, signature = bbclib_utils.get_n_bytes(ptr, sig_len, data)
+            ptr, signature = bbclib_binary.get_n_bytes(ptr, sig_len, data)
             self.add(signature=signature, pubkey=pubkey)
         except:
             return False

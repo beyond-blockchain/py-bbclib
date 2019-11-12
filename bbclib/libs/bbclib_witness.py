@@ -21,7 +21,7 @@ current_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(current_dir, "../.."))
 
 from bbclib import id_length_conf
-from bbclib.libs import bbclib_utils
+from bbclib.libs import bbclib_binary
 
 
 class BBcWitness:
@@ -45,7 +45,7 @@ class BBcWitness:
         for i in range(len(self.sig_indices)):
             ret += " [%d]\n" % i
             if self.user_ids[i] is not None:
-                ret += "  user_id: %s\n" % bbclib_utils.str_binary(self.user_ids[i])
+                ret += "  user_id: %s\n" % bbclib_binary.str_binary(self.user_ids[i])
                 ret += "  sig_index: %d\n" % self.sig_indices[i]
             else:
                 ret += "  None (invalid)\n"
@@ -72,10 +72,10 @@ class BBcWitness:
         Returns:
             bytes: packed binary data
         """
-        dat = bytearray(bbclib_utils.to_2byte(len(self.sig_indices)))
+        dat = bytearray(bbclib_binary.to_2byte(len(self.sig_indices)))
         for i in range(len(self.sig_indices)):
-            dat.extend(bbclib_utils.to_bigint(self.user_ids[i], size=self.idlen_conf["user_id"]))
-            dat.extend(bbclib_utils.to_2byte(self.sig_indices[i]))
+            dat.extend(bbclib_binary.to_bigint(self.user_ids[i], size=self.idlen_conf["user_id"]))
+            dat.extend(bbclib_binary.to_2byte(self.sig_indices[i]))
         return bytes(dat)
 
     def unpack(self, data):
@@ -89,14 +89,14 @@ class BBcWitness:
         ptr = 0
         data_size = len(data)
         try:
-            ptr, signum = bbclib_utils.get_n_byte_int(ptr, 2, data)
+            ptr, signum = bbclib_binary.get_n_byte_int(ptr, 2, data)
             self.user_ids = list()
             self.sig_indices = list()
             for i in range(signum):
-                ptr, uid = bbclib_utils.get_bigint(ptr, data)
+                ptr, uid = bbclib_binary.get_bigint(ptr, data)
                 self.idlen_conf["user_id"] = len(uid)
                 self.user_ids.append(uid)
-                ptr, idx = bbclib_utils.get_n_byte_int(ptr, 2, data)
+                ptr, idx = bbclib_binary.get_n_byte_int(ptr, 2, data)
                 self.sig_indices.append(idx)
                 if ptr > data_size:
                     return False

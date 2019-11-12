@@ -36,6 +36,7 @@ error_text = ""
 
 
 import bbclib.libs.bbclib_keypair as bbclib_keypair
+import bbclib.libs.bbclib_binary as bbclib_binary
 import bbclib.libs.bbclib_utils as bbclib_utils
 import bbclib.libs.bbclib_transaction as bbclib_transaction
 import bbclib.libs.bbclib_signature as bbclib_signature
@@ -123,7 +124,7 @@ DEFAULT_CURVETYPE = bbclib_signature.DEFAULT_CURVETYPE
 
 get_new_id = bbclib_utils.get_new_id
 get_random_id = bbclib_utils.get_random_id
-get_random_value = bbclib_utils.get_random_value
+get_random_value = bbclib_binary.get_random_value
 convert_id_to_string = bbclib_utils.convert_id_to_string
 convert_idstring_to_bytes = bbclib_utils.convert_idstring_to_bytes
 deep_copy_with_key_stringify = bbclib_utils.deep_copy_with_key_stringify

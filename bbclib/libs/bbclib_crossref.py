@@ -20,7 +20,7 @@ import sys
 current_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(current_dir, "../.."))
 
-from bbclib.libs import bbclib_utils
+from bbclib.libs import bbclib_binary
 from bbclib import id_length_conf
 
 
@@ -35,8 +35,8 @@ class BBcCrossRef:
 
     def __str__(self):
         ret  = "Cross_Ref:\n"
-        ret += "  domain_id: %s\n" % bbclib_utils.str_binary(self.domain_id)
-        ret += "  transaction_id: %s\n" % bbclib_utils.str_binary(self.transaction_id)
+        ret += "  domain_id: %s\n" % bbclib_binary.str_binary(self.domain_id)
+        ret += "  transaction_id: %s\n" % bbclib_binary.str_binary(self.transaction_id)
         return ret
 
     def pack(self):
@@ -45,8 +45,8 @@ class BBcCrossRef:
         Returns:
             bytes: packed binary data
         """
-        dat = bytearray(bbclib_utils.to_bigint(self.domain_id))
-        dat.extend(bbclib_utils.to_bigint(self.transaction_id, self.idlen_conf["transaction_id"]))
+        dat = bytearray(bbclib_binary.to_bigint(self.domain_id))
+        dat.extend(bbclib_binary.to_bigint(self.transaction_id, self.idlen_conf["transaction_id"]))
         return bytes(dat)
 
     def unpack(self, data):
@@ -59,8 +59,8 @@ class BBcCrossRef:
         """
         ptr = 0
         try:
-            ptr, self.domain_id = bbclib_utils.get_bigint(ptr, data)
-            ptr, self.transaction_id = bbclib_utils.get_bigint(ptr, data)
+            ptr, self.domain_id = bbclib_binary.get_bigint(ptr, data)
+            ptr, self.transaction_id = bbclib_binary.get_bigint(ptr, data)
             self.idlen_conf["transaction_id"] = len(self.transaction_id)
         except:
             return False

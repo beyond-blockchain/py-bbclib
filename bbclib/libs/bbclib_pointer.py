@@ -19,7 +19,7 @@ import os
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(current_dir, "../.."))
-from bbclib.libs import bbclib_utils
+from bbclib.libs import bbclib_binary
 from bbclib import id_length_conf
 
 
@@ -45,8 +45,8 @@ class BBcPointer:
             self.asset_id = None
 
     def __str__(self):
-        ret =  "     transaction_id: %s\n" % bbclib_utils.str_binary(self.transaction_id)
-        ret += "     asset_id: %s\n" % bbclib_utils.str_binary(self.asset_id)
+        ret =  "     transaction_id: %s\n" % bbclib_binary.str_binary(self.transaction_id)
+        ret += "     asset_id: %s\n" % bbclib_binary.str_binary(self.asset_id)
         return ret
 
     def add(self, transaction_id=None, asset_id=None):
@@ -62,12 +62,12 @@ class BBcPointer:
         Returns:
             bytes: packed binary data
         """
-        dat = bytearray(bbclib_utils.to_bigint(self.transaction_id, size=self.idlen_conf["transaction_id"]))
+        dat = bytearray(bbclib_binary.to_bigint(self.transaction_id, size=self.idlen_conf["transaction_id"]))
         if self.asset_id is None:
-            dat.extend(bbclib_utils.to_2byte(0))
+            dat.extend(bbclib_binary.to_2byte(0))
         else:
-            dat.extend(bbclib_utils.to_2byte(1))
-            dat.extend(bbclib_utils.to_bigint(self.asset_id, size=self.idlen_conf["asset_id"]))
+            dat.extend(bbclib_binary.to_2byte(1))
+            dat.extend(bbclib_binary.to_bigint(self.asset_id, size=self.idlen_conf["asset_id"]))
         return bytes(dat)
 
     def unpack(self, data):
@@ -80,11 +80,11 @@ class BBcPointer:
         """
         ptr = 0
         try:
-            ptr, self.transaction_id = bbclib_utils.get_bigint(ptr, data)
+            ptr, self.transaction_id = bbclib_binary.get_bigint(ptr, data)
             self.idlen_conf["transaction_id"] = len(self.transaction_id)
-            ptr, num = bbclib_utils.get_n_byte_int(ptr, 2, data)
+            ptr, num = bbclib_binary.get_n_byte_int(ptr, 2, data)
             if num == 1:
-                ptr, self.asset_id = bbclib_utils.get_bigint(ptr, data)
+                ptr, self.asset_id = bbclib_binary.get_bigint(ptr, data)
                 self.idlen_conf["asset_id"] = len(self.asset_id)
             else:
                 self.asset_id = None

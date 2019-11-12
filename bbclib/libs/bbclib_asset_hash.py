@@ -23,7 +23,7 @@ import traceback
 current_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(current_dir, "../.."))
 
-from bbclib.libs import bbclib_utils
+from bbclib.libs import bbclib_binary
 from bbclib import id_length_conf
 
 
@@ -48,7 +48,7 @@ class BBcAssetHash:
         ret =  "  AssetHash:\n"
         ret += "     num of hashes: %s\n" % len(self.asset_ids)
         for h in self.asset_ids:
-            ret += "     asset_id(hash): %s\n" % bbclib_utils.str_binary(h)
+            ret += "     asset_id(hash): %s\n" % bbclib_binary.str_binary(h)
         return ret
 
     def add(self, asset_ids=None):
@@ -74,9 +74,9 @@ class BBcAssetHash:
             bytes: packed binary data
         """
         dat = bytearray()
-        dat.extend(bbclib_utils.to_2byte(len(self.asset_ids)))
+        dat.extend(bbclib_binary.to_2byte(len(self.asset_ids)))
         for h in self.asset_ids:
-            dat.extend(bbclib_utils.to_bigint(h, size=self.idlen_conf["asset_id"]))
+            dat.extend(bbclib_binary.to_bigint(h, size=self.idlen_conf["asset_id"]))
         return bytes(dat)
 
     def unpack(self, data):
@@ -89,9 +89,9 @@ class BBcAssetHash:
         """
         ptr = 0
         try:
-            ptr, num_ids = bbclib_utils.get_n_byte_int(ptr, 2, data)
+            ptr, num_ids = bbclib_binary.get_n_byte_int(ptr, 2, data)
             for i in range(num_ids):
-                ptr, asset_id = bbclib_utils.get_bigint(ptr, data)
+                ptr, asset_id = bbclib_binary.get_bigint(ptr, data)
                 self.asset_ids.append(asset_id)
                 self.idlen_conf["asset_id"] = len(asset_id)
         except:

@@ -28,7 +28,7 @@ from collections import Mapping
 current_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(current_dir, "../.."))
 
-from bbclib.libs import bbclib_utils
+from bbclib.libs import bbclib_binary
 from bbclib.libs import bbclib_error
 from bbclib.libs.bbclib_config import DEFAULT_CURVETYPE
 from bbclib.libs.bbclib_keypair import KeyPair
@@ -73,7 +73,7 @@ class BBcTransaction:
 
     def __str__(self):
         ret =  "------- Dump of the transaction data ------\n"
-        ret += "* transaction_id: %s\n" % bbclib_utils.str_binary(self.transaction_id)
+        ret += "* transaction_id: %s\n" % bbclib_binary.str_binary(self.transaction_id)
         ret += "version: %d\n" % self.version
         ret += "timestamp: %d\n" % self.timestamp
         if self.version != 0:
@@ -130,27 +130,27 @@ class BBcTransaction:
             self.cross_ref = cross_ref
         return True
 
-    def create_event(self, asset_group_id, reference_indices=None, mandatory_approvers=None, option_approvers=None):
+    def add_event(self, asset_group_id, reference_indices=None, mandatory_approvers=None, option_approvers=None):
         """Add BBcEvent object in this transaction (for allowing method chain style coding)"""
         event = BBcEvent(asset_group_id=asset_group_id, id_length=self.idlen_conf, version=self.version)
         event.add(reference_index=reference_indices, mandatory_approver=mandatory_approvers, option_approver=option_approvers)
         self.add(event=event)
         return event
 
-    def add_reference(self, asset_group_id, ref_transaction=None, event_index_in_ref=0):
+    def add_relation(self, asset_group_id):
+        """Add BBcRelation object in this transaction (for allowing method chain style coding)"""
+        relation = BBcRelation(asset_group_id=asset_group_id, id_length=self.idlen_conf, version=self.version)
+        self.add(relation=relation)
+        return relation
+
+    def create_reference(self, asset_group_id, ref_transaction=None, event_index_in_ref=0):
         """Add BBcReference object in this transaction (for allowing method chain style coding)"""
         ref = BBcReference(asset_group_id=asset_group_id, transaction=self, ref_transaction=ref_transaction,
                            event_index_in_ref=event_index_in_ref, id_length=self.idlen_conf)
         self.add(reference=ref)
         return self
 
-    def create_relation(self, asset_group_id):
-        """Add BBcRelation object in this transaction (for allowing method chain style coding)"""
-        relation = BBcRelation(asset_group_id=asset_group_id, id_length=self.idlen_conf, version=self.version)
-        self.add(relation=relation)
-        return relation
-
-    def add_cross_ref(self, transaction_id, domain_id=None):
+    def create_cross_ref(self, transaction_id, domain_id=None):
         """Add BBcCrossRef object in this transaction (for allowing method chain style coding)"""
         cr = BBcCrossRef(domain_id=domain_id, transaction_id=transaction_id)
         self.add(cross_ref=cr)
@@ -230,42 +230,42 @@ class BBcTransaction:
 
     def pack(self, for_id=False):
         """Pack the whole parts"""
-        dat = bytearray(bbclib_utils.to_4byte(self.version))
-        dat.extend(bbclib_utils.to_8byte(self.timestamp))
+        dat = bytearray(bbclib_binary.to_4byte(self.version))
+        dat.extend(bbclib_binary.to_8byte(self.timestamp))
         if self.version != 0:
-            dat.extend(bbclib_utils.to_2byte(self.idlen_conf["transaction_id"]))
-        dat.extend(bbclib_utils.to_2byte(len(self.events)))
+            dat.extend(bbclib_binary.to_2byte(self.idlen_conf["transaction_id"]))
+        dat.extend(bbclib_binary.to_2byte(len(self.events)))
         for i in range(len(self.events)):
             evt = self.events[i].pack()
-            dat.extend(bbclib_utils.to_4byte(len(evt)))
+            dat.extend(bbclib_binary.to_4byte(len(evt)))
             dat.extend(evt)
-        dat.extend(bbclib_utils.to_2byte(len(self.references)))
+        dat.extend(bbclib_binary.to_2byte(len(self.references)))
         for i in range(len(self.references)):
             refe = self.references[i].pack()
-            dat.extend(bbclib_utils.to_4byte(len(refe)))
+            dat.extend(bbclib_binary.to_4byte(len(refe)))
             dat.extend(refe)
-        dat.extend(bbclib_utils.to_2byte(len(self.relations)))
+        dat.extend(bbclib_binary.to_2byte(len(self.relations)))
         for i in range(len(self.relations)):
             rtn = self.relations[i].pack()
-            dat.extend(bbclib_utils.to_4byte(len(rtn)))
+            dat.extend(bbclib_binary.to_4byte(len(rtn)))
             dat.extend(rtn)
         if self.witness is not None:
-            dat.extend(bbclib_utils.to_2byte(1))
+            dat.extend(bbclib_binary.to_2byte(1))
             witness = self.witness.pack()
-            dat.extend(bbclib_utils.to_4byte(len(witness)))
+            dat.extend(bbclib_binary.to_4byte(len(witness)))
             dat.extend(witness)
         else:
-            dat.extend(bbclib_utils.to_2byte(0))
+            dat.extend(bbclib_binary.to_2byte(0))
         self.transaction_base_digest = hashlib.sha256(dat).digest()
 
         dat_cross = bytearray()
         if self.cross_ref is not None:
             cross = self.cross_ref.pack()
-            dat_cross.extend(bbclib_utils.to_2byte(1))
-            dat_cross.extend(bbclib_utils.to_4byte(len(cross)))
+            dat_cross.extend(bbclib_binary.to_2byte(1))
+            dat_cross.extend(bbclib_binary.to_4byte(len(cross)))
             dat_cross.extend(cross)
         else:
-            dat_cross.extend(bbclib_utils.to_2byte(0))
+            dat_cross.extend(bbclib_binary.to_2byte(0))
 
         if for_id:
             dat_for_id = bytearray(self.transaction_base_digest)
@@ -274,10 +274,10 @@ class BBcTransaction:
 
         dat.extend(dat_cross)
 
-        dat.extend(bbclib_utils.to_2byte(len(self.signatures)))
+        dat.extend(bbclib_binary.to_2byte(len(self.signatures)))
         for signature in self.signatures:
             sig = signature.pack()
-            dat.extend(bbclib_utils.to_4byte(len(sig)))
+            dat.extend(bbclib_binary.to_4byte(len(sig)))
             dat.extend(sig)
         self.transaction_data = bytes(dat)
         return self.transaction_data
@@ -294,16 +294,16 @@ class BBcTransaction:
         ptr = 0
         data_size = len(data)
         try:
-            ptr, self.version = bbclib_utils.get_n_byte_int(ptr, 4, data)
-            ptr, self.timestamp = bbclib_utils.get_n_byte_int(ptr, 8, data)
+            ptr, self.version = bbclib_binary.get_n_byte_int(ptr, 4, data)
+            ptr, self.timestamp = bbclib_binary.get_n_byte_int(ptr, 8, data)
             if self.version != 0:
-                ptr, id_length = bbclib_utils.get_n_byte_int(ptr, 2, data)
+                ptr, id_length = bbclib_binary.get_n_byte_int(ptr, 2, data)
                 self.idlen_conf["transaction_id"] = id_length
-            ptr, evt_num = bbclib_utils.get_n_byte_int(ptr, 2, data)
+            ptr, evt_num = bbclib_binary.get_n_byte_int(ptr, 2, data)
             self.events = []
             for i in range(evt_num):
-                ptr, size = bbclib_utils.get_n_byte_int(ptr, 4, data)
-                ptr, evtdata = bbclib_utils.get_n_bytes(ptr, size, data)
+                ptr, size = bbclib_binary.get_n_byte_int(ptr, 4, data)
+                ptr, evtdata = bbclib_binary.get_n_bytes(ptr, size, data)
                 evt = BBcEvent()
                 if not evt.unpack(evtdata):
                     return False
@@ -312,11 +312,11 @@ class BBcTransaction:
                     return False
                 self.asset_group_ids[evt.asset.asset_id] = evt.asset_group_id
 
-            ptr, ref_num = bbclib_utils.get_n_byte_int(ptr, 2, data)
+            ptr, ref_num = bbclib_binary.get_n_byte_int(ptr, 2, data)
             self.references = []
             for i in range(ref_num):
-                ptr, size = bbclib_utils.get_n_byte_int(ptr, 4, data)
-                ptr, refdata = bbclib_utils.get_n_bytes(ptr, size, data)
+                ptr, size = bbclib_binary.get_n_byte_int(ptr, 4, data)
+                ptr, refdata = bbclib_binary.get_n_bytes(ptr, size, data)
                 refe = BBcReference(None, self)
                 if not refe.unpack(refdata):
                     return False
@@ -324,11 +324,11 @@ class BBcTransaction:
                 if ptr >= data_size:
                     return False
 
-            ptr, rtn_num = bbclib_utils.get_n_byte_int(ptr, 2, data)
+            ptr, rtn_num = bbclib_binary.get_n_byte_int(ptr, 2, data)
             self.relations = []
             for i in range(rtn_num):
-                ptr, size = bbclib_utils.get_n_byte_int(ptr, 4, data)
-                ptr, rtndata = bbclib_utils.get_n_bytes(ptr, size, data)
+                ptr, size = bbclib_binary.get_n_byte_int(ptr, 4, data)
+                ptr, rtndata = bbclib_binary.get_n_bytes(ptr, size, data)
                 rtn = BBcRelation()
                 if not rtn.unpack(rtndata, self.version):
                     return False
@@ -343,34 +343,34 @@ class BBcTransaction:
                     for h in rtn.asset_hash.asset_ids:
                         self.asset_group_ids[h] = rtn.asset_group_id
 
-            ptr, witness_num = bbclib_utils.get_n_byte_int(ptr, 2, data)
+            ptr, witness_num = bbclib_binary.get_n_byte_int(ptr, 2, data)
             if witness_num == 0:
                 self.witness = None
             else:
-                ptr, size = bbclib_utils.get_n_byte_int(ptr, 4, data)
-                ptr, witnessdata = bbclib_utils.get_n_bytes(ptr, size, data)
+                ptr, size = bbclib_binary.get_n_byte_int(ptr, 4, data)
+                ptr, witnessdata = bbclib_binary.get_n_bytes(ptr, size, data)
                 self.witness = BBcWitness()
                 self.witness.transaction = self
                 if not self.witness.unpack(witnessdata):
                     return False
 
-            ptr, cross_num = bbclib_utils.get_n_byte_int(ptr, 2, data)
+            ptr, cross_num = bbclib_binary.get_n_byte_int(ptr, 2, data)
             if cross_num == 0:
                 self.cross_ref = None
             else:
-                ptr, size = bbclib_utils.get_n_byte_int(ptr, 4, data)
-                ptr, crossdata = bbclib_utils.get_n_bytes(ptr, size, data)
+                ptr, size = bbclib_binary.get_n_byte_int(ptr, 4, data)
+                ptr, crossdata = bbclib_binary.get_n_bytes(ptr, size, data)
                 self.cross_ref = BBcCrossRef()
                 if not self.cross_ref.unpack(crossdata):
                     return False
 
-            ptr, sig_num = bbclib_utils.get_n_byte_int(ptr, 2, data)
+            ptr, sig_num = bbclib_binary.get_n_byte_int(ptr, 2, data)
             self.signatures = []
             for i in range(sig_num):
-                ptr, size = bbclib_utils.get_n_byte_int(ptr, 4, data)
+                ptr, size = bbclib_binary.get_n_byte_int(ptr, 4, data)
                 sig = BBcSignature()
                 if size > 4:
-                    ptr, sigdata = bbclib_utils.get_n_bytes(ptr, size, data)
+                    ptr, sigdata = bbclib_binary.get_n_bytes(ptr, size, data)
                     if not sig.unpack(sigdata):
                         return False
                 self.signatures.append(sig)

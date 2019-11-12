@@ -218,7 +218,7 @@ def make_relation_with_asset(asset_group_id, user_id, asset_body=None, asset_fil
     return relation
 
 
-def add_pointer_in_relation(relation, ref_transaction_id=None, ref_asset_id=None):
+def create_pointer_in_relation(relation, ref_transaction_id=None, ref_asset_id=None):
     """Utility to add BBcRelation object with BBcPointer in the BBcRelation object"""
     pointer = BBcPointer(transaction_id=ref_transaction_id, asset_id=ref_asset_id,
                          format_type=relation.format_type, id_length=relation.id_length)
