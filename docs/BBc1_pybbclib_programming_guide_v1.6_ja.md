@@ -1,9 +1,11 @@
-Programming guide for py-bbclib version 1.4
+Programming guide for py-bbclib version 1.6
 ====
 
 py-bbclibはBBc-1のトランザクションのデータ構造を定義するモジュールであり、BBc-1の中で最も重要な役割をもつ。このドキュメントでは、py-bbclibの利用方法についてまとめ、後半では事例集を載せる。
 
 なお、このリポジトリはbbc1リポジトリからも参照されるが、BBc-1のアプリケーション開発のための解説はbbc1リポジトリ内の[docs/BBc1_programming_guide_v1.3_ja.md](https://github.com/beyond-blockchain/bbc1/tree/develop/docs)を参照されたい。
+
+v1.6へのアップデートではいくつかのAPIが追加され、トランザクションの生成をより直観的に行えるようにした。具体的なコーディング方法は、[docs/BBc1_pybbclib_utility_functions_v1.6_ja.md](../docs/BBc1_pybbclib_utility_functions_v1.6_ja.md)を参照されたい。なお、後方互換性は保たれており、v1.5までのコードもそのまま動作する。
 
 
 
@@ -120,71 +122,37 @@ result = keyPair3.import_publickey_cert_pem(publicKey_cert_x509, privateKey_pem)
 
 ### BBcTransactionオブジェクトの生成
 
-BBcTransactionオブジェクトのは、以下のようにして生成する。
-
-```python
-from bbclib import BBcTransaction, BBcRelation, BBcWitness, BBcAsset, KeyPair
-
-keyPair_1 = KeyPair()
-keyPair_1.genarate()
-transaction1 = BBcTransaction()
-```
-
-生成されたBBcTransactionオブジェクトは、他のパーツ群（BBcEvent、BBcReference、BBcRelation、BBcAsset、BBcCrossRef、BBcSignature）の器となるオブジェクトである。データ構造は[BBc-1_transaction_data_ja.md](./BBc-1_transaction_data_ja.md)を参照されたい。上記のようにして「素のトランザクション」を生成した時点ではヘッダ情報（タイムスタンプなど）しか含まれていない。そのあと、様々なパーツを追加していく必要がある。
-
-以下に例を示す。
-
-```python
-asset_group_1 = bbclib.get_new_id("asset_group_id for testing")
-user_1 = bbclib.get_new_id("user x")
-
-asset1 = BBcAsset()
-asset1.add(user_id=user_1, asset_body=b'some information')
-
-relation1 = BBcRelation()
-relation1.add(asset_group_id=asset_group_1, asset=asset1)  # 1
-
-witness1 = BBcWitness()
-witness1.add_witness(user_1)   # 2
-
-transaction1.add(relation=relation1, witness=witness1)  #3
-```
-
-BBcAssetは、BBcRelation（またはBBcEvent）の中に含まれるオブジェクトであるため、上の例の#1で、BBcRelationオブジェクトの中にBBcAssetオブジェクトを格納している。そして上の例の#2で、BBcTransactionオブジェクトにBBcRelationオブジェクトとBBcWitnessオブジェクトを格納している。
-
-ここまでで、BBcTransactionオブジェクトの本体が完成したことになる。最後にuser_1の署名を付与すれば全体が完成する。
-
-```python
-sig = transaction1.sign(private_key=keyPair_1.private_key, public_key=keyPair_1.public_key) #4
-transaction1.witness.add_signature(user_id=user_1, signature=sig)  #5
-```
-
-まず、上の例の#3でBBcSignatureオブジェクトを生成する。#4の戻り値sigはすでに、transactionへの署名やそれを検証するための公開鍵の情報を含んだものになっている。そして、#5で、そのBBcSignatureオブジェクトをuser_1と紐づけてBBcTransactionオブジェクトに格納している。つまりこれによって、「#3で生成した署名がuser_1による署名であること」を主張することになる。
-
-なお、上記のような一連のコードを簡単に生成するためのユーティリティメソッドが[bbc1/libs/bbclib_utils.py](bbc1/libs/bbclib_utils.py)に定義されている。それを使えば、上記の例は次のように書くことができる。
+BBcTransactionオブジェクトを生成し、その中身に情報を追加していくことで、トランザクションを作ることができる。BBcTransactionクラスなどを直接インスタンス化して作り上げることも可能だが、ユーティリティメソッドを使うことで作成手順を減らすことができる。ここでは、v1.6で導入されたメソッドを用いた方法を紹介する。以下に例を示す。
 
 ```python
 import bbclib
 
-keyPair_1 = KeyPair()
-keyPair_1.genarate()
-asset_group_1 = bbclib.get_new_id("asset_group_id for testing")
-user_1 = bbclib.get_new_id("user x")
+keyPair_1 = bbclib.KeyPair()  #1
+keyPair_1.genarate()          #1
 
-transaction1 = bbclib.make_transaction(relation_num=1, witness=True)  #6
-bbclib.add_relation_asset(transaction1, relation_idx=0,
-                          asset_group_id=asset_group_1,
-                          user_id=user_1, asset_body=b'some information')  #7
-transaction1.witness.add_witness(user_1)  #8
+asset_group_1 = bbclib.get_new_id("asset_group_id for testing") #1
+user_1 = bbclib.get_new_id("user x") #1
 
+transaction1 = bbclib.make_transaction(relation_num=1, witness=True)  #2
 
-sig = transaction1.sign(keypair=keyPair_1)  #9
-transaction1.witness.add_signature(user_1, sig)
+transaction1.relations[0]\
+   .set_asset_group(asset_group_1) \   #3
+   .create_asset(user_id=user_1, asset_body=b'some information') #4
+
+transaction1.add_witness(user_1)   # 5
+
+txobj.add_signature(user_id=user_1, keypair=keyPair_1) #6
 ```
 
-上記の#6は、BBcTransactionオブジェクトを作ると同時に、BBcRelationオブジェクト1つとBBcWitnessオブジェクトも生成してBBcTransactionオブジェクトに格納するユーティリティである。また、#7は、BBcTransactionオブジェクト内のBBcRelationオブジェクトに、BBcAssetオブジェクトを生成・格納するためのユーティリティである。このユーティリティメソッドの第1引数で対象となるBBcTransactionオブジェクトを、第2引数でその中の何番目のBBcRelationオブジェクトかを指定している。#8は#2と同じ処理である。#9はユーティリティではないが、秘密鍵と公開鍵を個別に指定せずとも、鍵ペアオブジェクトをそのまま渡すことができることを示している。署名以外のすべての情報がBBcTransactionオブジェクトに格納された後に、#9の署名生成を行わなければならないことに注意されたい。
+まず、上記#1では、鍵ペアを作成したり、トランザクション内で用いるIDを生成している。これらは単なるサンプルであるため、適当な値になっている。
 
-以上でBBcTransactionオブジェクトが完成した。この後、このオブジェクトをシリアライズすれば、それを保存したり他へ送信することができるようになる。
+そして、#2で必要なパーツ（この例ではBBcRelationとBBcWitnessオブジェクト）を含んだBBcTransactionオブジェクトが生成される。データ構造は[BBc-1_transaction_data_ja.md](./BBc-1_transaction_data_ja.md)を参照されたい。上記のようにして「素のトランザクション」を生成した時点ではヘッダ情報（タイムスタンプなど）しか含まれていない。そのあと、様々なパーツを追加していく必要がある。
+
+つぎに#3にてBBcRelationオブジェクトにasset_group_idをセットし、さらに#4でBBcAssetオブジェクトを#4で追加している。set_asset_group()やcreate_asset()などは操作対象のBBcRelationオブジェクト自身を返すので、メソッドチェーン形式で記述できる。
+
+最後の#5では、署名する予定のユーザのユーザIDをBBcWitnessオブジェクトに登録している。
+
+ここまでで、BBcTransactionオブジェクトの本体が完成したことになる。最後に#6でuser_1の署名を付与すれば全体が完成する。この後、このオブジェクトをシリアライズすれば、それを保存したり他へ送信することができるようになる。
 
 
 
@@ -193,36 +161,28 @@ transaction1.witness.add_signature(user_1, sig)
 前節の例は、他のトランザクションと何の関係も持たない単独のトランザクションを生成する例だった。本節ではBBcPointerを含めることで、他のトランザクションとの関係性を持たせる例を紹介する。なお、関係を持たせるトランザクションは前節で生成したtransaction1とする。
 
 ```python
-from bbclib import BBcTransaction, BBcRelation, BBcPointer, BBcWitness, BBcAsset, KeyPair
+import bbclib
 
 asset_group_1 = bbclib.get_new_id("asset_group_id for testing")
 user_1 = bbclib.get_new_id("user x")
-
-asset2 = BBcAsset()
-asset2.add(user_id=user_1, asset_body=b'some information')
-
-pointer2 = BBcPointer()
 transaction_id_1 = transaction1.transaction_id   # 1
-asset_id_1 = transaction1.relation[0].asset.asset_id  #2
-pointer2.add(transaction_id=transaction_id_1, asset_id=asset_id_1)  # 3
+asset_id_1 = transaction1.relation[0].asset.asset_id  #1
 
-relation2 = BBcRelation()
-relation2.add(asset_group_id=asset_group_1, asset=asset2, pointer=pointer2)  # 4
+transaction2 = bbclib.make_transaction(relation_num=1, witness=True)  #2
 
-witness2 = BBcWitness()
-witness2.add_witness(user_1)
+transaction2.relations[0]\
+   .set_asset_group(asset_group_1) \  #3
+   .create_asset(user_id=user_1, asset_body=b'some information') #4
+   .create_pointer(transaction_id=transaction_id_1, asset_id=asset_id_1) #4-B
 
-transaction2 = BBcTransaction()
-transaction2.add(relation=relation2, witness=witness2)
-sig = transaction1.sign(private_key=keyPair_1.private_key, public_key=keyPair_1.public_key)
-transaction1.witness.add_signature(user_id=user_1, signature=sig)
+transaction2.add_witness(user_1)   # 5
+
+transaction2.add_signature(user_id=user_1, keypair=keyPair_1) #6
 ```
 
-前節との違いは、#1〜#4の部分だけである。BBcTransactionオブジェクトを構築する手順はどのようなトランザクションを作るときも同じであり、含めたいパーツを作り、それをaddメソッドで追加すればよい。
+前節との違いは、#4-Bの部分だけである。BBcTransactionオブジェクトを構築する手順はどのようなトランザクションを作るときも同じであり、含めたいパーツを作り、それをaddメソッドで追加すればよい。
 
-上記の例の#1、#2は関係するトランザクションやアセットの識別子を取得し、#3でそれをBBcPointerオブジェクトに格納している。なお、関係するassetが自明であれば、asset_idの方はNoneを指定しても構わない（トランザクションの中にアセットが一つしかない場合など）。
-
-BBcPointerオブジェクトはBBcRelationオブジェクトの中に含まれるため、上記#4にて、pointer2もいっしょにBBcRelationオブジェクトの中に加えている。
+上記の例の#1、#2は関係するトランザクションやアセットの識別子を取得し、#4-BでそれをBBcPointerオブジェクトに格納している。なお、関係するassetが自明であれば、asset_idの方はNoneを指定しても構わない（トランザクションの中にアセットが一つしかない場合など）。
 
 
 
@@ -314,7 +274,6 @@ ptr_assetId_2 = pointer_2.asset_id
 
 ```python
 import bbclib
-from bbclib import BBcTransaction, BBcEvent, BBcReference, BBcRelation, BBcWitness, BBcAsset, KeyPair
 
 asset_group_1 = bbclib.get_new_id("asset_group_id for testing #1")
 asset_group_2 = bbclib.get_new_id("asset_group_id for testing #2")
@@ -322,9 +281,9 @@ asset_group_2 = bbclib.get_new_id("asset_group_id for testing #2")
 user_1 = bbclib.get_new_id("user 1")
 user_2 = bbclib.get_new_id("user 2")
 
-keyPair_user_1 = KeyPair()
+keyPair_user_1 = bbclib.KeyPair()
 keyPair_user_1.generate()
-keyPair_user_2 = KeyPair()
+keyPair_user_2 = bbclib.KeyPair()
 keyPair_user_2.generate()
 ```
 
@@ -355,18 +314,14 @@ keyPair_user_2.generate()
 ```python
 transaction1 = bbclib.make_transaction(relation_num=1, witness=True)
 
-bbclib.add_relation_asset(transaction1, relation_idx=0,
-                          asset_group_id=asset_group_1,
-                          user_id=user_1, asset_body=b'some information')
+transaction1.reltions[0] \
+    .set_asset_group(asset_group_1) \
+    .create_asset(user_id=user_1, asset_body=b'some information')
 
-transaction1.witness.add_witness(user_1)
-transaction1.witness.add_witness(user_2)
-
-sig1 = transaction1.sign(keypair=keyPair_1)
-sig2 = transaction1.sign(keypair=keyPair_2)
-
-transaction1.witness.add_signature(user_1, sig1)
-transaction1.witness.add_signature(user_2, sig2)
+transaction1.add_witness(user_1)
+transaction1.add_witness(user_2)
+transaction1.add_signature(user_id=user_1, keypair=keyPair_user_1)
+transaction1.add_signature(user_id=user_2, keypair=keyPair_user_2)
 ```
 
 
@@ -400,34 +355,23 @@ transaction1.witness.add_signature(user_2, sig2)
 ```python
 transaction5 = bbclib.make_transaction(relation_num=2, witness=True)
 
-bbclib.add_relation_asset(transaction5, relation_idx=0,
-                          asset_group_id=asset_group_1,
-                          user_id=user_1, asset_body=b'some information 1')
-bbclib.add_relation_pointer(transaction5, relation_idx=0,
-                           ref_transaction_id=transaction_id_1,
-                           ref_asset_id=asset_id_1)
-bbclib.add_relation_pointer(transaction5, relation_idx=1,
-                           ref_transaction_id=transaction_id_2,
-                           ref_asset_id=asset_id_2)
+transaction5.reltions[0] \
+    .set_asset_group(asset_group_1) \
+    .create_asset(user_id=user_1, asset_body=b'some information 1')
+    .create_pointer(transaction_id=transaction_id_1, asset_id=asset_id_1)
+    .create_pointer(transaction_id=transaction_id_2, asset_id=asset_id_2)
 
-bbclib.add_relation_asset(transaction5, relation_idx=1,
-                          asset_group_id=asset_group_2,
-                          user_id=user_1, asset_body=b'some information 2')
-bbclib.add_relation_pointer(transaction5, relation_idx=0,
-                           ref_transaction_id=transaction_id_3,
-                           ref_asset_id=None)
-bbclib.add_relation_pointer(transaction5, relation_idx=1,
-                           ref_transaction_id=transaction_id_4,
-                           ref_asset_id=None)
+transaction5.reltions[1] \
+    .set_asset_group(asset_group_2) \
+    .create_asset(user_id=user_1, asset_body=b'some information 2')
+    .create_pointer(transaction_id=transaction_id_3, asset_id=None)
+    .create_pointer(transaction_id=transaction_id_4, asset_id=None)
 
-transaction5.witness.add_witness(user_1)
-transaction5.witness.add_witness(user_2)
+transaction5.add_witness(user_1)
+transaction5.add_witness(user_2)
 
-sig1 = transaction5.sign(keypair=keyPair_1)
-sig2 = transaction5.sign(keypair=keyPair_2)
-
-transaction5.witness.add_signature(user_1, sig1)
-transaction5.witness.add_signature(user_2, sig2)
+transaction1.add_signature(user_id=user_1, keypair=keyPair_user_1)
+transaction1.add_signature(user_id=user_2, keypair=keyPair_user_2)
 ```
 
 
@@ -455,17 +399,14 @@ transaction5.witness.add_signature(user_2, sig2)
 ```
 
 ```python
-transaction1 = bbclib.make_transaction(event_num=1, witness=True)
+transaction6 = bbclib.make_transaction(event_num=1, witness=True)
 
-bbclib.add_event_asset(transaction1, event_idx=0,
-                       asset_group_id=asset_group_1,
-                       user_id=user_1, asset_body=b'some information')
+transaction6.events[0] \
+    .set_asset_group(asset_group_1) \
+    .create_asset(user_id=user_1, asset_body=b'some information')
 
-transaction1.witness.add_witness(user_1)
-
-sig1 = transaction1.sign(keypair=keyPair_1)
-
-transaction1.witness.add_signature(user_1, sig1)
+transaction6.add_witness(user_1)
+transaction6.add_signature(user_id=user_1, keypair=keyPair_user_1)
 ```
 
 
@@ -500,17 +441,16 @@ transaction1.witness.add_signature(user_1, sig1)
 参照しているトランザクションがtransaction1で、その中の1番目のBBcEventをUTXOの入力だと想定する。
 
 ```python
-transaction2 = bbclib.make_transaction(event_num=1, reference_num=1, witness=False)
+transaction7 = bbclib.make_transaction(event_num=1, reference_num=1, witness=False)
 
-bbclib.add_event_asset(transaction1, event_idx=0,
-                       asset_group_id=asset_group_1,
-                       user_id=user_1, asset_body=b'some information X')
-bbclib.add_reference_to_transaction(transaction2, 
-                                    asset_group_id=asset_group_1,
-                                    ref_transaction_obj=transaction1,
-                                    event_index_in_ref=0)
+transaction7.events[0] \
+    .set_asset_group(asset_group_1) \
+    .create_asset(user_id=user_1, asset_body=b'some information')
 
-sig1 = transaction1.sign(keypair=keyPair_1)
-transaction1.reference.add_signature_object(user_1, sig1)
+transaction7.create_reference(asset_group_id=asset_group_1,
+                              ref_transaction_obj=transaction1,
+                              event_index_in_ref=0)
+
+transaction7.add_signature_object(user_id=user_1, keypair=keyPair_user_1)
 ```
 
