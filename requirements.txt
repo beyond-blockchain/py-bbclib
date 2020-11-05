@@ -1,5 +1,5 @@
 atomicwrites==1.4.0
-attrs==19.3.0
+attrs==20.3.0
 Authlib==0.14.3
 bson==0.5.10
 cffi==1.14.3
