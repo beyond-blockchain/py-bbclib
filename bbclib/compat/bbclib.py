@@ -26,7 +26,7 @@ import zlib
 import random
 import time
 import traceback
-from collections import Mapping
+from collections.abc import Mapping
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(current_dir, "../.."))
