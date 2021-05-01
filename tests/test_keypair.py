@@ -1,5 +1,4 @@
 from authlib.jose import JsonWebKey
-from authlib.jose import JWK_ALGORITHMS
 import hashlib
 import json
 
@@ -70,8 +69,8 @@ class TestKey(object):
         keyid1 = keypair1.get_key_id()
 
         pubkey = keypair1.get_public_key_in_pem()
-        jwk = JsonWebKey(algorithms=JWK_ALGORITHMS)
-        obj = jwk.dumps(pubkey, kty='EC')
+        obj = JsonWebKey.import_key(pubkey, {'kty': 'EC'})
+        obj["kty"] = "EC"
         json_obj = json.dumps(obj, separators=(',', ':'), sort_keys=True)
         keyid2 = hashlib.sha256(json_obj.encode()).digest()
         assert keyid1 == keyid2
