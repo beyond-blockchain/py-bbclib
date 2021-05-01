@@ -1,6 +1,10 @@
 Change log
 ======
 
+## v1.6.1
+* update modules
+* fix import problem regarding collections
+
 ## v1.6
 * support method-chain style coding to create transaction object
 
