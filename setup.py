@@ -5,7 +5,7 @@ from os import path
 from setuptools import setup
 from setuptools.command.install import install
 
-VERSION = "1.6"
+VERSION = "1.6.1"
 
 here = path.abspath(path.dirname(__file__))
 
