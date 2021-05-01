@@ -172,7 +172,7 @@ transaction2 = bbclib.make_transaction(relation_num=1, witness=True)  #2
 
 transaction2.relations[0]\
    .set_asset_group(asset_group_1) \  #3
-   .create_asset(user_id=user_1, asset_body=b'some information') #4
+   .create_asset(user_id=user_1, asset_body=b'some information') \ #4
    .create_pointer(transaction_id=transaction_id_1, asset_id=asset_id_1) #4-B
 
 transaction2.add_witness(user_1)   # 5
@@ -357,14 +357,14 @@ transaction5 = bbclib.make_transaction(relation_num=2, witness=True)
 
 transaction5.reltions[0] \
     .set_asset_group(asset_group_1) \
-    .create_asset(user_id=user_1, asset_body=b'some information 1')
-    .create_pointer(transaction_id=transaction_id_1, asset_id=asset_id_1)
+    .create_asset(user_id=user_1, asset_body=b'some information 1') \
+    .create_pointer(transaction_id=transaction_id_1, asset_id=asset_id_1) \
     .create_pointer(transaction_id=transaction_id_2, asset_id=asset_id_2)
 
 transaction5.reltions[1] \
     .set_asset_group(asset_group_2) \
-    .create_asset(user_id=user_1, asset_body=b'some information 2')
-    .create_pointer(transaction_id=transaction_id_3, asset_id=None)
+    .create_asset(user_id=user_1, asset_body=b'some information 2') \
+    .create_pointer(transaction_id=transaction_id_3, asset_id=None) \
     .create_pointer(transaction_id=transaction_id_4, asset_id=None)
 
 transaction5.add_witness(user_1)

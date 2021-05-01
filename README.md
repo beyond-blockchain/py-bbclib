@@ -42,7 +42,7 @@ The sign/verify performance comparison on MacBookPro 2016 (2.7 GHz Quad core Int
 | use cryptograpy module | about 15 seconds                              |
 | bbclib-go              | about 4 seconds                              |
 
-*condition: The test code creates a BBcTransaction object with 2 signatures and verify this transaction object. This unit os sign/verify process is iterated 10,000 times.*
+*condition: The test code creates a BBcTransaction object with 2 signatures and verify this transaction object. This unit of sign/verify process is iterated 10,000 times.*
 
 
 

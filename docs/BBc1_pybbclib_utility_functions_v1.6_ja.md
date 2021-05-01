@@ -53,8 +53,8 @@ BBcRelationオブジェクトに対して、asset_group_idを設定したり（s
 
 ```python
 txobj = bbclib.make_transaction(relation_num=1, witness=True)
-txobj.relations[0]
-    .set_asset_group(<bytes型識別子>)
+txobj.relations[0] \
+    .set_asset_group(<bytes型識別子>) \
     .create_asset(user_id=<bytes型識別子>, asset_body=<文字列,bytes型など任意の情報>)
 ```
 
@@ -84,8 +84,8 @@ BBcRelationオブジェクトに対して、BBcAssetRawオブジェクトを新�
 
 ```python
 txobj = bbclib.make_transaction(relation_num=1, witness=True)
-txobj.relations[0]
-   .set_asset_group(<bytes型識別子>)
+txobj.relations[0] \
+   .set_asset_group(<bytes型識別子>) \
    .create_asset_raw(asset_id=<bytes型識別子>, asset_body=<文字列,bytes型など任意の情報>)
 ```
 
@@ -107,8 +107,8 @@ BBcRelationオブジェクトに対して、BBcAssetHashオブジェクトを新
 
 ```python
 txobj = bbclib.make_transaction(relation_num=1, witness=True)
-txobj.relations[0]
-   .set_asset_group(<bytes型識別子>)
+txobj.relations[0] \
+   .set_asset_group(<bytes型識別子>) \
    .create_asset_hash(asset_ids=[<bytes型識別子>,<bytes型識別子>,,,])
 ```
 
@@ -130,9 +130,9 @@ BBcRelationオブジェクトに対して、BBcPointerオブジェクトを新�
 
 ```python
 txobj = bbclib.make_transaction(relation_num=1, witness=True)
-txobj.relations[0]
-    .set_asset_group(<bytes型識別子>)
-    .create_asset(user_id=<bytes型識別子>, asset_body=<文字列,bytes型など任意の情報>)
+txobj.relations[0] \
+    .set_asset_group(<bytes型識別子>) \
+    .create_asset(user_id=<bytes型識別子>, asset_body=<文字列,bytes型など任意の情報>) \
     .create_pointer(transaction_id=<bytes型識別子>, asset_id=<bytes型識別子>)
 ```
 
@@ -183,9 +183,9 @@ BBcEventオブジェクトに対して、asset_group_idの設定、参照先BBcR
 
 ```python
 txobj = bbclib.make_transaction(relation_num=1, witness=True)
-txobj.events[0]
-    .set_asset_group(<bytes型識別子>)
-    .add_reference_index(0)
+txobj.events[0] \
+    .set_asset_group(<bytes型識別子>) \
+    .add_reference_index(0) \
     .create_asset(user_id=<bytes型識別子>, asset_body=<文字列,bytes型など任意の情報>)
 ```
 
@@ -211,15 +211,15 @@ BBcEventオブジェクトに対して、mandatory_approver、option_approverを
 
 ```python
 txobj = bbclib.make_transaction(relation_num=1, witness=True)
-txobj.events[0]
-    .set_asset_group(<bytes型識別子>)
-    .add_reference_index(0)
-    .create_asset(user_id=<bytes型識別子>, asset_body=<文字列,bytes型など任意の情報>)
-    .add_mandatory_approver(<bytes型識別子>)
-    .add_mandatory_approver(<bytes型識別子>)
-    .set_option_parameter(numerator=1, denominator=3)
-    .add_option_approver(<bytes型識別子>)
-    .add_option_approver(<bytes型識別子>)
+txobj.events[0] \
+    .set_asset_group(<bytes型識別子>) \
+    .add_reference_index(0) \
+    .create_asset(user_id=<bytes型識別子>, asset_body=<文字列,bytes型など任意の情報>) \
+    .add_mandatory_approver(<bytes型識別子>) \
+    .add_mandatory_approver(<bytes型識別子>) \
+    .set_option_parameter(numerator=1, denominator=3) \
+    .add_option_approver(<bytes型識別子>) \
+    .add_option_approver(<bytes型識別子>) \
     .add_option_approver(<bytes型識別子>)
 ```
 
@@ -247,12 +247,12 @@ BBcWitnessオブジェクトに署名予定のuser_idを登録したり(add_witn
 txobj = bbclib.make_transaction(relation_num=1, witness=True)
 ..中略
 
-txobj
-   .add_witness(user_id=<bytes型識別子1>)
+txobj \
+   .add_witness(user_id=<bytes型識別子1>) \
    .add_witness(user_id=<bytes型識別子2>)
 
-txobj
-  .add_signature(user_id=<bytes型識別子1>, keypair=<KeyPairオブジェクト>)
+txobj \
+  .add_signature(user_id=<bytes型識別子1>, keypair=<KeyPairオブジェクト>) \
   .add_signature(user_id=<bytes型識別子2>, keypair=<KeyPairオブジェクト>)
 ```
 
