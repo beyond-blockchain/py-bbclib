@@ -2,7 +2,7 @@ atomicwrites==1.4.0
 attrs==20.3.0
 Authlib==0.15.4
 bson==0.5.10
-cffi==1.14.5
+cffi==1.14.6
 cryptography==3.4.7
 importlib-metadata==4.6.1
 iniconfig==1.1.1
