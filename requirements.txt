@@ -1,6 +1,6 @@
 atomicwrites==1.4.0
 attrs==20.3.0
-Authlib==0.15.4
+Authlib==0.15.5
 bson==0.5.10
 cffi==1.15.0
 cryptography==3.4.8
