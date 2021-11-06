@@ -11,7 +11,7 @@ msgpack==1.0.2
 packaging==20.9
 pluggy==0.13.1
 py==1.11.0
-pycparser==2.20
+pycparser==2.21
 pyparsing==2.4.7
 pytest==6.2.5
 python-dateutil==2.8.2
