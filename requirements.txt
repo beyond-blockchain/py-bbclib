@@ -4,7 +4,7 @@ Authlib==0.15.5
 bson==0.5.10
 cffi==1.15.0
 cryptography==3.4.8
-importlib-metadata==4.8.1
+importlib-metadata==4.8.2
 iniconfig==1.1.1
 more-itertools==8.10.0
 msgpack==1.0.2
