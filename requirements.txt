@@ -8,7 +8,7 @@ importlib-metadata==4.8.2
 iniconfig==1.1.1
 more-itertools==8.12.0
 msgpack==1.0.3
-packaging==20.9
+packaging==21.3
 pluggy==0.13.1
 py==1.11.0
 pycparser==2.21
