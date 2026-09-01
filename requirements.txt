@@ -14,7 +14,7 @@ py==1.11.0
 pycparser==2.21
 pyparsing==2.4.7
 pytest==6.2.5
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
 six==1.16.0
 toml==0.10.2
 wcwidth==0.2.5
