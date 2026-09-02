@@ -1,4 +1,4 @@
-atomicwrites==1.4.0
+atomicwrites==1.4.1
 attrs==20.3.0
 Authlib==0.15.5
 bson==0.5.10
