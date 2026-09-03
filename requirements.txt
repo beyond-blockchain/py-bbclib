@@ -15,7 +15,7 @@ pycparser==2.21
 pyparsing==2.4.7
 pytest==6.2.5
 python-dateutil==2.8.2
-six==1.16.0
+six==1.17.0
 toml==0.10.2
 wcwidth==0.2.5
 zipp==3.8.0
